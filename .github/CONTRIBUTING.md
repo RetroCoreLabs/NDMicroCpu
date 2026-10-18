@@ -106,6 +106,16 @@ breaks `MERMAID_COLOR_STANDARDS.md`.
 > variable such as `%USERPROFILE%` or `~` is fine - that is the portable way to name a per-user
 > location.
 
+The documents in `src/docs` are also the Guides section of the DocFX site. Its navigation is
+written from the tracked files, never by hand:
+
+```powershell
+# from src
+.\eng\gen-docs-toc.ps1       # rewrites docs\toc.yml; commit it with the new document
+dotnet tool restore
+dotnet docfx docfx\docfx.json --warningsAsErrors   # the same strict build the workflow runs
+```
+
 A README follows `README-TEMPLATE.md`, beside the repositories: one sentence at the top that a
 stranger to the subject understands, four badges that can each be wrong, every application in a
 table linking its own README, install before build-from-source, licence last.

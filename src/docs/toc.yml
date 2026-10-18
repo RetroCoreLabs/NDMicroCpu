@@ -1,0 +1,59 @@
+# The Guides section of the DocFX site (src\docfx). Written by eng\gen-docs-toc.ps1 from the
+# documents git tracks in src\docs; run it after adding or renaming one, never edit by hand.
+- name: The back-wiring PROM / installation number (VERSN, IDBS,INR = 35 octal)
+  href: Backwiring-PROM-Installation-Number.md
+- name: INSTRUCTION-VERIFY Test Campaign — Emulator Bugs Found and Fixed
+  href: INSTRUCTION-VERIFY-Test-Campaign.md
+- name: ND-110/ND-120 Microcode Technical Details
+  href: microcode-details.md
+- name: ND-110 Microcode Boot Process
+  href: ND110-Boot-Process.md
+- name: ND-110 OPCOM (MOPC) Commands Reference
+  href: opcom-commands.md
+- name: INSTRUCTION-B "SEGMENT" Command — Annotated Disassembly
+  href: SEGMENT-Command-Disassembly.md
+- name: ND-110 Single Step Microcode Mechanism
+  href: single-step.md
+- name: INSTRUCTION-VERIFY Reference Traces
+  href: traces/README.md
+  items:
+  - name: DIRECT-TRA-IIC-ND120
+    href: traces/DIRECT-TRA-IIC-ND120.md
+  - name: IIC-PATH-RUN-ND120
+    href: traces/IIC-PATH-RUN-ND120.md
+  - name: PIC-TRACE-RUN-ND120
+    href: traces/PIC-TRACE-RUN-ND120.md
+  - name: 32-BITS-FLOATING
+    href: traces/TRACE-INSTRUCTION-VERIFY-32-BITS-FLOATING.md
+  - name: 48-BITS-FLOATING
+    href: traces/TRACE-INSTRUCTION-VERIFY-48-BITS-FLOATING.md
+  - name: ARGUMENT-ND120
+    href: traces/TRACE-INSTRUCTION-VERIFY-ARGUMENT-ND120.md
+  - name: ARGUMENT
+    href: traces/TRACE-INSTRUCTION-VERIFY-ARGUMENT.md
+  - name: BCD
+    href: traces/TRACE-INSTRUCTION-VERIFY-BCD.md
+  - name: BIT-OPERATIONS
+    href: traces/TRACE-INSTRUCTION-VERIFY-BIT-OPERATIONS.md
+  - name: BYTE-STRING-ND120
+    href: traces/TRACE-INSTRUCTION-VERIFY-BYTE-STRING-ND120.md
+  - name: MEMORY-REFERENCE
+    href: traces/TRACE-INSTRUCTION-VERIFY-MEMORY-REFERENCE.md
+  - name: ND100-24BIT
+    href: traces/TRACE-INSTRUCTION-VERIFY-ND100-24BIT.md
+  - name: ND100-CX
+    href: traces/TRACE-INSTRUCTION-VERIFY-ND100-CX.md
+  - name: PRIVILEGED
+    href: traces/TRACE-INSTRUCTION-VERIFY-PRIVILEGED.md
+  - name: REGISTER-OPERATIONS
+    href: traces/TRACE-INSTRUCTION-VERIFY-REGISTER-OPERATIONS.md
+  - name: RUN
+    href: traces/TRACE-INSTRUCTION-VERIFY-RUN.md
+  - name: SEQUENCE
+    href: traces/TRACE-INSTRUCTION-VERIFY-SEQUENCE.md
+  - name: SHIFT-INSTRUCTIONS
+    href: traces/TRACE-INSTRUCTION-VERIFY-SHIFT-INSTRUCTIONS.md
+  - name: STACK
+    href: traces/TRACE-INSTRUCTION-VERIFY-STACK.md
+  - name: TRACE-OPCOM-0BANG-CSPATH
+    href: traces/TRACE-OPCOM-0BANG-CSPATH.md

@@ -1,6 +1,7 @@
 name: Docs
 
-# Builds the DocFX API reference and publishes it to GitHub Pages on every push to main.
+# Builds the DocFX site (API reference and guides) and publishes it to GitHub Pages on every
+# push to main. DocFX is pinned in src/.config/dotnet-tools.json.
 # Repository Settings -> Pages -> Source must be "GitHub Actions".
 on:
   push:
@@ -17,7 +18,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -25,25 +26,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: src/global.json
 
       - name: Install DocFX
-        run: dotnet tool install -g docfx
+        working-directory: src
+        run: dotnet tool restore
 
       # DocFX restores and compiles the documented projects itself to read the XML comments.
+      # --warningsAsErrors: a broken link or cross reference fails the build.
       - name: Build site
         working-directory: src
-        run: docfx docfx/docfx.json
+        run: dotnet docfx docfx/docfx.json --warningsAsErrors
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: src/docfx/_site
 
@@ -57,4 +60,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

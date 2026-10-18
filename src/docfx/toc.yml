@@ -1,5 +1,8 @@
 - name: Home
   href: index.md
+- name: Guides
+  href: ../docs/toc.yml
+  topicHref: ../docs/ND110-Boot-Process.md
 - name: API Reference
   href: api/
   topicHref: api/index.md

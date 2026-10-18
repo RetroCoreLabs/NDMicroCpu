@@ -6,6 +6,11 @@ management, interrupt system, UART and operator panel modelled from the schemati
 Microprogrammer's Guide. The macro instruction set is whatever the micro code makes it, which is
 what makes this emulator the reference other ND-100 emulators are checked against.
 
+- **[Guides](../docs/ND110-Boot-Process.md)** - the boot process, the OPCOM console, single step,
+  the micro word, the back-wiring PROM, the INSTRUCTION-B test campaign and the reference traces.
+- **[API reference](api/index.md)** - the Core library, the command line engine and the debugger
+  contract, from the XML documentation.
+
 The repository holds:
 
 - **NDMicroCpu.Core** - the CPU and its hardware blocks, the memory, the control store loader and
@@ -19,5 +24,5 @@ The repository holds:
 - **ndmicrodebug** and **ndmicrodebug-client** - a gRPC server and a sample client so another emulator
   can step this CPU and compare registers and memory; the contract is in NDMicroCpu.Debugger.Contracts.
 
-The [API reference](api/index.md) covers the Core library, the command line engine and the
-debugger contract.
+The two microprogrammer's manuals are PDFs; they are not on this site but in the repository under
+`src/docs/manuals`.

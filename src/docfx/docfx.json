@@ -24,7 +24,7 @@
     "content": [
       { "files": [ "api/**.yml", "api/index.md" ] },
       { "files": [ "*.md", "toc.yml" ] },
-      { "files": [ "docs/**.md", "docs/**/toc.yml" ] }
+      { "files": [ "docs/**.md", "docs/toc.yml" ], "exclude": [ "docs/manuals/**" ], "src": ".." }
     ],
     "resource": [ { "files": [ "images/**" ] } ],
     "output": "_site",

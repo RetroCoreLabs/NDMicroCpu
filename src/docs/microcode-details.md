@@ -475,7 +475,7 @@ dotnet run --project ND110Cli            # ND-120 / DELILAH-L
 dotnet run --project ND110Cli -- --nd110 # ND-110
 ```
 
-See [the ndmicrocli README](../NDMicroCpu.Cli/README.md) for the full command reference, examples,
+See [the ndmicrocli README](https://github.com/RetroCoreLabs/NDMicroCpu/blob/main/src/NDMicroCpu.Cli/README.md) for the full command reference, examples,
 and architecture notes.
 
 ### Trace and Logging
@@ -516,4 +516,4 @@ This implementation is based on the official Norsk Data documentation:
 - ND-110 Microprogram Listing (32-bit version)
 - AMD 2914 Priority Interrupt Controller specifications
 
-For the complete historical documentation, see the [Documentation section](../../README.md#documentation) in the main README.
+For the complete historical documentation, see the [Documentation section](https://github.com/RetroCoreLabs/NDMicroCpu#documentation) in the main README.
