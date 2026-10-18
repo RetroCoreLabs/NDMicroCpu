@@ -31,7 +31,7 @@
     "globalMetadata": {
       "_appName": "NDMicroCpu",
       "_appTitle": "NDMicroCpu",
-      "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs",
+      "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs - <a href=\"https://github.com/RetroCoreLabs/NDMicroCpu\">Source on GitHub</a>",
       "_enableSearch": true,
       "_disableContribution": false,
       "_gitContribute": {
