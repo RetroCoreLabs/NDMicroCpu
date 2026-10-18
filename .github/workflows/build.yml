@@ -1,0 +1,25 @@
+# Build and test on every push and pull request.
+#
+# The CPU test suite boots the emulated machine through its micro code self-test many times and
+# runs Norsk Data's own INSTRUCTION-B verification program; it takes a few minutes. The [Explicit]
+# trace generators and diagnostics are not run by `dotnet test`.
+name: build
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+      # The web emulator is Blazor WebAssembly; its publish needs the wasm-tools workload, the build does not.
+      - run: dotnet restore
+        working-directory: src
+      - run: dotnet build -c Release --no-restore -warnaserror -nodeReuse:false
+        working-directory: src
+      - run: dotnet test -c Release --no-build -nodeReuse:false
+        working-directory: src

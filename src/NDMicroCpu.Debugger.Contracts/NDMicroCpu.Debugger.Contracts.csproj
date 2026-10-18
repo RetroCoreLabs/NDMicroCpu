@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NDMicroCpu.Debugger.Contracts</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Code-first gRPC contract: [DataContract] messages and the [ServiceContract] interface, shared by the server, the client and any other emulator that compares itself against this CPU. -->
+    <PackageReference Include="protobuf-net" />
+    <PackageReference Include="protobuf-net.Grpc" />
+    <PackageReference Include="System.ServiceModel.Primitives" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,5 @@
+@page "/AluFunc"
+@inject IAppService appService
+<h1>ALU</h1>
+
+<NDMicroCpu.Web.Components.AluInternalRegistersView BufAlu="appService.Cpu.hw.alu"></NDMicroCpu.Web.Components.AluInternalRegistersView>   

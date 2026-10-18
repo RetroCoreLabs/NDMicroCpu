@@ -1,0 +1,24 @@
+## .NET
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+## build.ps1 output - single-file executables, rebuildable
+publish/
+## DocFX output
+src/docfx/_site/
+## Microcode copies the web emulator serves: generated at build from NDMicroCpu.Core/microcode (see NDMicroCpu.Web.csproj)
+src/NDMicroCpu.Web/wwwroot/Assets/ND-110-RASK-CODE.TXT
+src/NDMicroCpu.Web/wwwroot/Assets/ND-110-RASK-LISTING.TXT
+src/NDMicroCpu.Web/wwwroot/Assets/ND-120-DELILAH-L-CODE.TXT
+src/NDMicroCpu.Web/wwwroot/Assets/ND-120-DELILAH-L-LISTING.TXT
+## Files the [Explicit] tests write beside their sources
+src/tests/NDMicroCpu.Core.Tests/Boot/paging-b-capture.txt
+src/tests/NDMicroCpu.Core.Tests/Perf/*-result.txt
+
+# Scaffold written by repo-standards\tools\apply-standards.ps1. Copy from it, then delete it.
+README.template.md

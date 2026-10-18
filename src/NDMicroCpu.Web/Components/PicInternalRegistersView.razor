@@ -1,0 +1,415 @@
+﻿@implements IDisposable
+
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[0].ReadOnly" @bind-Value="@element.R[0].OctalValue" Label="@element.R[0].Label" Variant="Variant.Outlined" title="@element.R[0].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[0].adornment" />
+            <MudTextField ReadOnly="@element.R[1].ReadOnly" @bind-Value="@element.R[1].OctalValue" Label="@element.R[1].Label" Variant="Variant.Outlined" title="@element.R[1].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[1].adornment" />
+            <MudTextField ReadOnly="@element.R[2].ReadOnly" @bind-Value="@element.R[2].OctalValue" Label="@element.R[2].Label" Variant="Variant.Outlined" title="@element.R[2].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[2].adornment" />
+            <MudTextField ReadOnly="@element.R[3].ReadOnly" @bind-Value="@element.R[3].OctalValue" Label="@element.R[3].Label" Variant="Variant.Outlined" title="@element.R[3].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[3].adornment" />
+            <MudTextField ReadOnly="@element.R[4].ReadOnly" @bind-Value="@element.R[4].OctalValue" Label="@element.R[4].Label" Variant="Variant.Outlined" title="@element.R[4].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[4].adornment" />
+            <MudTextField ReadOnly="@element.R[5].ReadOnly" @bind-Value="@element.R[5].OctalValue" Label="@element.R[5].Label" Variant="Variant.Outlined" title="@element.R[5].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[5].adornment" />
+            <MudTextField ReadOnly="@element.R[6].ReadOnly" @bind-Value="@element.R[6].OctalValue" Label="@element.R[6].Label" Variant="Variant.Outlined" title="@element.R[6].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[6].adornment" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[8].ReadOnly" @bind-Value="@element.R[8].OctalValue" Label="@element.R[8].Label" Variant="Variant.Outlined" title="@element.R[8].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[8].adornment" />
+            <MudTextField ReadOnly="@element.R[9].ReadOnly" @bind-Value="@element.R[9].OctalValue" Label="@element.R[9].Label" Variant="Variant.Outlined" title="@element.R[9].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[9].adornment" />
+            <MudTextField ReadOnly="@element.R[10].ReadOnly" @bind-Value="@element.R[10].OctalValue" Label="@element.R[10].Label" Variant="Variant.Outlined" title="@element.R[10].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[10].adornment" />
+            <MudTextField ReadOnly="@element.R[11].ReadOnly" @bind-Value="@element.R[11].OctalValue" Label="@element.R[11].Label" Variant="Variant.Outlined" title="@element.R[11].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[11].adornment" />
+            <MudTextField ReadOnly="@element.R[12].ReadOnly" @bind-Value="@element.R[12].OctalValue" Label="@element.R[12].Label" Variant="Variant.Outlined" title="@element.R[12].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[12].adornment" />
+            <MudTextField ReadOnly="@element.R[13].ReadOnly" @bind-Value="@element.R[13].OctalValue" Label="@element.R[13].Label" Variant="Variant.Outlined" title="@element.R[13].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[13].adornment" />
+            <MudTextField ReadOnly="@element.R[14].ReadOnly" @bind-Value="@element.R[14].OctalValue" Label="@element.R[14].Label" Variant="Variant.Outlined" title="@element.R[14].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[14].adornment" />
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>
+
+
+@code {
+
+    [Parameter]
+    public CPU? Cpu { get; set; }
+
+    public enum PicFieldID
+    {
+        IRQ_MASKED,
+        IRQ_DETECTED,
+        PIC_STATUS,
+        PIC_PRIORITY,
+        PIC_VECTOR,
+        PIC_MBUS,
+        PIC_SBUS,
+        free1,
+
+        PIC_IRQ_DETECT,
+        PIC_IRQ_ENABLED,
+        PIC_IRQ_PENDING,
+        IIE,
+        PIE,
+        PID,
+        CPU_STS,
+        free_3,
+        MAX
+    }
+
+    public IrqRegs element = new IrqRegs();
+
+    protected override void OnParametersSet()
+    {
+        if (Cpu != null)
+        {
+            element.SetCpu(Cpu);
+            base.OnParametersSet();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        element.Dispose();
+    }
+
+    /// <summary>
+    /// Called from code to update specific fields
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="val"></param>
+    public void UpdateField(PicFieldID field, ushort val)
+    {
+        int r = (int)field;
+        string label = field.ToString();
+        element.R[r].UpdateValue(val);
+    }
+
+
+    public void ResetUI()
+    {
+        for (int i = 0; i < element.R.Length; i++)
+        {
+            element.R[i].ClearUpdated();
+        }
+        StateHasChanged();
+    }
+
+    public class IrqRegs : IDisposable
+    {
+        CPU? _cpu { get; set; }
+        public Register[] R;
+
+        public IrqRegs()
+        {
+            //int max = (int)AluFieldID.MAX+1;
+            int max = 16;
+            R = new Register[max];
+            for (ushort i = 0; i < max; i++)
+            {
+                PicFieldID field = (PicFieldID)i;
+                string label = field.ToString();
+                R[i] = new Register(i, label);
+                ushort regval = ReadRegister(field);
+
+                R[i].SetDescription(ReadRegisterDescription(field));
+                R[i].ReadOnly = IsReadOnly(field);
+
+                R[i].UpdateValue(regval, false);
+
+                R[i].OnReadRegister += ReadRegisterEventHandler;
+                R[i].OnWriteRegister += WriteRegisterEventHandler;
+
+            }
+        }
+
+        internal void SetCpu(CPU cpu)
+        {
+            _cpu = cpu;
+        }
+
+
+        bool IsReadOnly(PicFieldID id)
+        {
+            switch (id)
+            {
+                case PicFieldID.IRQ_MASKED:
+                case PicFieldID.IIE:
+                case PicFieldID.PIE:
+                case PicFieldID.PID:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+
+
+        ushort ReadRegister(PicFieldID id)
+        {
+            if (_cpu is null) return 0;
+            int val = 0;
+            //val = _cpu.hw.cpu_regs.ARG;
+            // val = _cpu.hw.RF3.UIRead((ushort)_cpu.hw.alu.PIL, (ushort)0);
+            bool pending = _cpu.hw.pic.ReadInterruptRequestPin == false;
+            bool enabled = _cpu.hw.pic.InterruptRequestEnabled;
+            bool IRQ = pending & enabled;
+
+            switch (id)
+            {
+                case PicFieldID.IRQ_MASKED:
+                    val = _cpu.hw.pic.ReadMask();
+                    // code to handle PIC_MASK_REG
+                    break;
+                case PicFieldID.IRQ_DETECTED:
+                    val = _cpu.hw.pic.ReadInterruptDetect();
+                    // code to handle PIC_IRQ_REG
+                    break;
+                case PicFieldID.PIC_STATUS:
+                    val = _cpu.hw.pic.ReadStatus();
+                    // code to handle PIC_STATUS
+                    break;
+                case PicFieldID.PIC_PRIORITY:
+                    val = _cpu.hw.pic.VectorOutput;
+                    // code to handle PIC_PRIORITY
+                    break;
+
+                case PicFieldID.PIC_MBUS:
+                    val = _cpu.hw.pic.ReadMaskBus();
+                    // code to handle PIC_MBUS
+                    break;
+                case PicFieldID.PIC_SBUS:
+                    val = _cpu.hw.pic.ReadSBus();
+                    // code to handle PIC_SBUS
+                    break;
+                case PicFieldID.free1:
+                    // code to handle free1
+                    break;
+                case PicFieldID.PIC_IRQ_DETECT:
+                    val = IRQ ? 1 : 0;
+                    // code to handle PIC_IRQ_DETECT
+                    break;
+                case PicFieldID.PIC_IRQ_ENABLED:
+                    val = enabled ? 1 : 0;
+                    // code to handle PIC_IRQ_ENABLED
+                    break;
+                case PicFieldID.PIC_IRQ_PENDING:
+                    val = pending ? 1 : 0;
+                    // code to handle PIC_IRQ_PENDING
+                    break;
+                case PicFieldID.PIC_VECTOR:
+                    val = _cpu.hw.pic.VectorOutput;
+                    // code to handle PIC_VECTOR
+                    break;
+                case PicFieldID.IIE:
+                    val = _cpu.hw.RF.UIRead(15, 10);
+                    // code to handle IIE
+                    break;
+                case PicFieldID.PIE:
+                    val = _cpu.hw.RF.UIRead(15, 11);
+                    // code to handle PIE
+                    break;
+                case PicFieldID.PID:
+                    val = _cpu.hw.RF.UIRead(15, 12);
+                    // code to handle PID
+                    break;
+                case PicFieldID.CPU_STS:
+                    val = _cpu.hw.alu.STS;
+                    break;
+                case PicFieldID.MAX:
+                    // code to handle MAX
+                    break;
+                default:
+                    // code to handle any other value of id
+                    break;
+            }
+
+
+
+            return (ushort)val;
+        }
+
+        string ReadRegisterDescription(PicFieldID id)
+        {
+            string val = "";
+
+            switch (id)
+            {
+                case PicFieldID.IRQ_MASKED:
+                    val = "The Mask Register holds the 16 mask bits associated with the 16 interrupt levels. 1=MASKED, 0=ENABLED";
+                    // code to handle PIC_MASK_REG
+                    break;
+                case PicFieldID.IRQ_DETECTED:
+                    val = "The Interrupt Register holds the Interrupt Inputs and is an eight-bit, edge-triggered register which is set on the rising edge of the Clock (CP) signal. 1=Inactive, 0=ACTIVE";
+                    // code to handle PIC_IRQ_REG
+                    break;
+                case PicFieldID.PIC_STATUS:
+                    val = "Status register holds code for lowest allowed interrupt  (Is calculated to Vector +1)";
+                    // code to handle PIC_STATUS
+                    break;
+                case PicFieldID.PIC_PRIORITY:
+                    val = "PIC PRIORITY (Highest active interrupt number)";
+                    // code to handle PIC_PRIORITY
+                    break;
+
+                case PicFieldID.PIC_MBUS:
+                    val = "PIC Internal Mask-BUS";
+                    // code to handle PIC_MBUS
+                    break;
+                case PicFieldID.PIC_SBUS:
+                    val = "PIC Internal Status-BUS";
+                    // code to handle PIC_SBUS
+                    break;
+                case PicFieldID.free1:
+                    // code to handle free1
+                    break;
+                case PicFieldID.PIC_IRQ_DETECT:
+                    val = "PIC IRQ Detected (1=DETECTED)";
+                    // code to handle PIC_IRQ_DETECT
+                    break;
+                case PicFieldID.PIC_IRQ_ENABLED:
+                    val = "PIC IRQ Enabled (1=ENABLED)";
+                    // code to handle PIC_IRQ_ENABLED
+                    break;
+                case PicFieldID.PIC_IRQ_PENDING:
+                    val = "PIC IRQ Pending (1=Pending)";
+                    // code to handle PIC_IRQ_PENDING
+                    break;
+                case PicFieldID.PIC_VECTOR:
+                    val = "Output is binary code for highest priority unmasked interrupt. The Interrupt Detect circuitry detects the presence of any unmasked Interrupt (P0-P7) Input. The eight-input Priority Encoder determines the highest priority, non-masked Interrupt Input ";
+                    // code to handle PIC_VECTOR
+                    break;
+                case PicFieldID.IIE:
+                    val = "SCR WORD HOLDING 'PIC' REPRESENTATION OF LAST IIE SETTING";
+                    // code to handle IIE
+                    break;
+                case PicFieldID.PIE:
+                    val = "SCRATCH WORD HOLDING THE 'PIE' REGISTER";
+                    // code to handle PIE
+                    break;
+                case PicFieldID.PID:
+                    val = "SCR WORD HOLDING MICROPROGRAM-KNOWN BITS OF PID REGISTER";
+                    // code to handle PID
+                    break;
+                case PicFieldID.CPU_STS:
+                    val = "CPU STS. High 8 bits are system, low 8 bits are level specific";
+                    break;
+                case PicFieldID.MAX:
+                    // code to handle MAX
+                    break;
+                default:
+                    // code to handle any other value of id
+                    break;
+            }
+
+            return val;
+        }
+
+        void WriteRegister(PicFieldID id, ushort val)
+        {
+            if (_cpu is null) return;
+
+            switch (id)
+            {
+                case PicFieldID.IRQ_MASKED:
+                    _cpu.hw.pic.WriteMask(val);
+                    // code to handle PIC_MASK_REG
+                    break;
+                case PicFieldID.IRQ_DETECTED: // R-O
+                                              //val = _cpu.hw.pic.ReadInterruptDetect();
+                                              // code to handle PIC_IRQ_REG
+                    break;
+                case PicFieldID.PIC_STATUS: // R-O
+                                            //val = _cpu.hw.pic.ReadStatus();
+                                            // code to handle PIC_STATUS
+                    break;
+                case PicFieldID.PIC_PRIORITY: // R-O
+                                              //val = _cpu.hw.pic.VectorOutput;
+                                              // code to handle PIC_PRIORITY
+                    break;
+
+                case PicFieldID.PIC_VECTOR:
+                    //val = _cpu.hw.pic.VectorOutput;
+                    // code to handle PIC_VECTOR
+                    break;
+
+                case PicFieldID.PIC_MBUS:
+                    //val = _cpu.hw.pic.ReadMaskBus();
+                    // code to handle PIC_MBUS
+                    break;
+                case PicFieldID.PIC_SBUS:
+                    //val = _cpu.hw.pic.ReadSBus();
+                    // code to handle PIC_SBUS
+                    break;
+                case PicFieldID.free1:
+                    // code to handle free1
+                    break;
+                case PicFieldID.PIC_IRQ_DETECT:
+                    //val = IRQ ? 1 : 0;
+                    // code to handle PIC_IRQ_DETECT
+                    break;
+                case PicFieldID.PIC_IRQ_ENABLED:
+                    //val = enabled ? 1 : 0;
+                    // code to handle PIC_IRQ_ENABLED
+                    break;
+                case PicFieldID.PIC_IRQ_PENDING:
+                    //val = pending ? 1 : 0;
+                    // code to handle PIC_IRQ_PENDING
+                    break;
+
+                case PicFieldID.IIE:
+                    _cpu.hw.RF.UIWrite(15, 10, val);
+                    // code to handle IIE
+                    break;
+                case PicFieldID.PIE:
+                    _cpu.hw.RF.UIWrite(15, 11, val);
+                    // code to handle PIE
+                    break;
+                case PicFieldID.PID:
+                    _cpu.hw.RF.UIWrite(15, 12, val);
+                    // code to handle PID
+                    break;
+                case PicFieldID.CPU_STS:
+                    _cpu.hw.alu.SetSTSfromDebugger(val);
+                    break;
+                case PicFieldID.MAX:
+                    // code to handle MAX
+                    break;
+                default:
+                    // code to handle any other value of id
+                    break;
+            }
+
+        }
+
+
+        public void Dispose()
+        {
+            int max = 16;
+            for (int i = 0; i < max; i++)
+            {
+                R[i].OnReadRegister -= ReadRegisterEventHandler;
+                R[i].OnWriteRegister -= WriteRegisterEventHandler;
+            }
+        }
+
+        public void ReadRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            if (_cpu is null) return;
+            PicFieldID field = (PicFieldID)e.Register;
+            string label = field.ToString();
+
+
+            e.Value = ReadRegister(field);
+            e.handled = true;
+        }
+
+
+        public void WriteRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            WriteRegister((PicFieldID)e.Register, (ushort)e.Value);
+            e.handled = true;
+        }
+
+
+    
+
+       
+    }
+ }

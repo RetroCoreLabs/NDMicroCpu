@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Command-line tool: lowercase, short, what it does (NAMING.md). -->
+    <AssemblyName>ndmicrodebug-client</AssemblyName>
+    <RootNamespace>NDMicroCpu.Debugger.Client</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.Client" />
+    <PackageReference Include="protobuf-net.Grpc" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NDMicroCpu.Debugger.Contracts\NDMicroCpu.Debugger.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

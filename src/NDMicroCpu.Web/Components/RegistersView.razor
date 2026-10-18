@@ -1,0 +1,153 @@
+@using NDMicroCpu.Web.Objects;
+
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="6">
+
+            <MudTextField @bind-Value="@element.R[0].OctalValue" Label="@element.R[0].Label" Variant="Variant.Outlined" title="@element.R[0].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[0].adornment" />
+            <MudTextField @bind-Value="@element.R[1].OctalValue" Label="@element.R[1].Label" Variant="Variant.Outlined" title="@element.R[1].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[1].adornment" />
+            <MudTextField @bind-Value="@element.R[2].OctalValue" Label="@element.R[2].Label" Variant="Variant.Outlined" title="@element.R[2].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[2].adornment" />
+            <MudTextField @bind-Value="@element.R[3].OctalValue" Label="@element.R[3].Label" Variant="Variant.Outlined" title="@element.R[3].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[3].adornment" />
+            <MudTextField @bind-Value="@element.R[4].OctalValue" Label="@element.R[4].Label" Variant="Variant.Outlined" title="@element.R[4].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[4].adornment" />
+            <MudTextField @bind-Value="@element.R[5].OctalValue" Label="@element.R[5].Label" Variant="Variant.Outlined" title="@element.R[5].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[5].adornment" />
+            <MudTextField @bind-Value="@element.R[6].OctalValue" Label="@element.R[6].Label" Variant="Variant.Outlined" title="@element.R[6].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[6].adornment" />
+            <MudTextField @bind-Value="@element.R[7].OctalValue" Label="@element.R[7].Label" Variant="Variant.Outlined" title="@element.R[7].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[7].adornment" />
+
+        </MudItem>
+        <MudItem xs="6">
+
+            <MudTextField @bind-Value="@element.R[8].OctalValue" Label="@element.R[8].Label" Variant="Variant.Outlined" title="@element.R[8].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[8].adornment" />
+            <MudTextField @bind-Value="@element.R[9].OctalValue" Label="@element.R[9].Label" Variant="Variant.Outlined" title="@element.R[9].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[9].adornment" />
+            <MudTextField @bind-Value="@element.R[10].OctalValue" Label="@element.R[10].Label" Variant="Variant.Outlined" title="@element.R[10].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[10].adornment" />
+            <MudTextField @bind-Value="@element.R[11].OctalValue" Label="@element.R[11].Label" Variant="Variant.Outlined" title="@element.R[11].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[11].adornment" />
+            <MudTextField @bind-Value="@element.R[12].OctalValue" Label="@element.R[12].Label" Variant="Variant.Outlined" title="@element.R[12].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[12].adornment" />
+            <MudTextField @bind-Value="@element.R[13].OctalValue" Label="@element.R[13].Label" Variant="Variant.Outlined" title="@element.R[13].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[13].adornment" />
+            <MudTextField @bind-Value="@element.R[14].OctalValue" Label="@element.R[14].Label" Variant="Variant.Outlined" title="@element.R[14].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[14].adornment" />
+            <MudTextField @bind-Value="@element.R[15].OctalValue" Label="@element.R[15].Label" Variant="Variant.Outlined" title="@element.R[15].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[15].adornment" />
+
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public RegisterFile? RegisterFile { get; set; }
+    [Parameter]
+    public ushort RegisterLevel { get; set; }
+
+    const int MAX_REG = 16;
+
+
+    RegistersData element = new RegistersData();
+
+
+    protected override void OnParametersSet()
+    {
+        if (RegisterFile != null)
+        {
+            element.SetParams(RegisterFile, RegisterLevel);
+            base.OnParametersSet();
+        }
+    }
+
+
+
+    private void Reset()
+    {
+        element = new RegistersData();
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Clear the "UI element showing the field has changed" (!)
+    /// </summary>
+    public void ResetUI()
+    {
+        element.ResetUI();
+        StateHasChanged();
+    }
+
+    // Helper class
+    public class RegistersData
+    {
+        private ushort _RegisterLevel;
+        private RegisterFile? _RegisterFile;
+        public Register[] R;
+
+        public RegistersData()
+        {
+            R = new Register[MAX_REG];
+            for (ushort i = 0; i < MAX_REG; i++)
+            {
+                R[i] = new Register(i, "R" + i.ToString());
+                R[i].UpdateValue(0, false);
+
+                R[i].OnReadRegister += ReadRegisterEventHandler;
+                R[i].OnWriteRegister += WriteRegisterEventHandler;
+            }
+        }
+
+        internal void SetParams(RegisterFile RegisterFile, ushort RegisterLevel)
+        {
+            _RegisterLevel = RegisterLevel;
+            _RegisterFile = RegisterFile;
+
+            for (ushort i = 0; i < MAX_REG; i++)
+            {
+                ushort val = RegisterFile.UIRead(_RegisterLevel, i);
+                R[i].SetDescription(RegisterFile.UIReadDescription(_RegisterLevel, i));
+                R[i].SetLabel(RegisterFile.UIReadLabel(_RegisterLevel, i));
+                //R[i].UpdateValue(val,true);
+            }
+        }
+
+        public void Dispose()
+        {
+            int max = 16;
+            for (int i = 0; i < max; i++)
+            {
+                R[i].OnReadRegister -= ReadRegisterEventHandler;
+                R[i].OnWriteRegister -= WriteRegisterEventHandler;
+            }
+
+            _RegisterFile = null;
+        }
+
+        public void ReadRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            if (_RegisterFile != null)
+            {
+                ushort val = _RegisterFile.UIRead(_RegisterLevel, e.Register);
+
+                e.Value = val;
+                e.handled = true;
+            }
+        }
+
+
+        public void WriteRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            if (_RegisterFile != null)
+            {
+
+                _RegisterFile.UIWrite(_RegisterLevel, e.Register, (ushort)e.Value);
+                e.handled = true;
+            }
+
+        }
+
+        public void ResetUI()
+        {
+            int max = 16;
+            for (int i = 0; i < max; i++)
+            {
+                R[i].ClearUpdated();
+            }
+        }
+
+    }
+}
+
+
+

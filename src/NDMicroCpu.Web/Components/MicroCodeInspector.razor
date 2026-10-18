@@ -1,0 +1,317 @@
+@using static NDMicroCpu.Core.AMD.Am2914;
+
+<MudPaper Width="300px" Elevation="0">
+    <MudTreeView Items="TreeItems" @bind-SelectedValue="ActivatedValue" @bind-SelectedValues="SelectedValues">
+        <ItemTemplate>
+            <MudTreeViewItem @bind-Expanded="@context.Expanded" Items="@context.Children" Value="@context.Value"
+                             Icon="@context.Icon" Text="@context.Text" EndText="@context.Value?.Content" EndTextTypo="@Typo.caption" />
+        </ItemTemplate>
+    </MudTreeView>
+</MudPaper>
+
+<div style="width: 100%">
+    <MudText Typo="@Typo.subtitle1">Activated item: @(ActivatedValue?.Title)</MudText>
+    </div>
+
+    @code {
+    [Parameter]
+    public NDMicroCpu.Core.MicroCode? microcode { get; set; }
+
+    [Parameter]
+    public CPU? cpu { get; set; }
+
+    void onTest()
+    {
+        if (ActivatedValue is not null)
+        {
+            ActivatedValue.Content = DateTime.Now.ToString();
+        }
+    }
+
+
+    private TreeItemData? ActivatedValue { get; set; }
+
+    private IReadOnlyCollection<TreeItemData>? SelectedValues { get; set; }
+
+    // MudBlazor's tree takes TreeItemData<T> nodes (text, icon, expanded, children) around our own
+    // value type, which carries the field name and the decoded content the inspector updates.
+    private List<TreeItemData<TreeItemData?>> TreeItems { get; set; } = new List<TreeItemData<TreeItemData?>>();
+
+    public class TreeItemData
+    {
+        public string Title { get; set; }
+
+        public string Icon { get; set; }
+
+        public string? Content { get; set; }
+
+        public TreeItemData(string title, string icon, string? content = null)
+        {
+            Title = title;
+            Icon = icon;
+            Content = content;
+        }
+    }
+
+    // One tree node: a group title with its children, expanded by default.
+    static TreeItemData<TreeItemData?> Group(string title, string icon, params TreeItemData[] children)
+    {
+        var kids = new List<TreeItemData<TreeItemData?>>(children.Length);
+        for (int i = 0; i < children.Length; i++)
+        {
+            kids.Add(Leaf(children[i]));
+        }
+        return GroupOf(title, icon, kids);
+    }
+
+    static TreeItemData<TreeItemData?> GroupOf(string title, string icon, List<TreeItemData<TreeItemData?>> kids)
+    {
+        return new TreeItemData<TreeItemData?>
+        {
+            Value = new TreeItemData(title, icon),
+            Text = title,
+            Icon = icon,
+            Expanded = true,
+            Children = kids
+        };
+    }
+
+    static TreeItemData<TreeItemData?> Leaf(TreeItemData value)
+    {
+        return new TreeItemData<TreeItemData?> { Value = value, Text = value.Title, Icon = value.Icon };
+    }
+
+    // ALU Instruction
+    private TreeItemData _alud;
+    private TreeItemData _aluf;
+    private TreeItemData _alus;
+
+
+    // ALU External Control
+    private TreeItemData _sts;
+    private TreeItemData _alu_a;
+    private TreeItemData _alu_b;
+    private TreeItemData _alu_cin;
+    private TreeItemData _alum;
+    private TreeItemData _mis;
+
+    // Internal Databus Control
+    private TreeItemData _idb;
+
+    // Command code
+    private TreeItemData _command;
+
+
+    // Condition Control
+    private TreeItemData _scond;
+    private TreeItemData _econd;
+    private TreeItemData _loop;
+
+    // Sequencing Control
+    private TreeItemData _sc_true_address;
+    private TreeItemData _sc_true_stack;
+    private TreeItemData _sc_branching_delay;
+    private TreeItemData _sc_branching_vectored;
+    private TreeItemData _sc_timing;
+
+
+    // Operands
+    private TreeItemData _b_operand;
+    private TreeItemData _a_operand;
+
+    // Combined data fields
+    private TreeItemData _combined_regname;
+    private TreeItemData _combined_bit;
+    private TreeItemData _combined_branch;
+    private TreeItemData _combined_pic_instr;
+    private TreeItemData _combined_test_object;
+
+
+    //protected override void OnInitialized()
+    public MicroCodeInspector()
+    {
+        _alud = new TreeItemData("Destination", Icons.Material.Filled.ArrowForward);
+        _aluf = new TreeItemData("Function", Icons.Material.Filled.Build);
+        _alus = new TreeItemData("Source", Icons.Material.Filled.ArrowBack);
+        TreeItems.Add(Group("ALU Instruction", Icons.Material.Filled.Hive, _alud, _aluf, _alus));
+
+        _sts = new TreeItemData("STS", Icons.Material.Filled.Functions);
+        _alu_a = new TreeItemData("RASEL", Icons.Material.Filled.LocalOffer);
+        _alu_b = new TreeItemData("RBSEL", Icons.Material.Filled.LocalOffer);
+        _alu_cin = new TreeItemData("Cin", Icons.Material.Filled.Input);
+        _alum = new TreeItemData("ALU Mode", Icons.Material.Filled.KeyboardDoubleArrowRight);
+        _mis = new TreeItemData("MIS", Icons.Material.Filled.ChangeCircle);
+        TreeItems.Add(Group("ALU External Control", Icons.Material.Filled.Apps, _sts, _alu_a, _alu_b, _alu_cin, _alum, _mis));
+
+        _idb = new TreeItemData("IDB", Icons.Material.Filled.Article);
+        TreeItems.Add(Group("Internal Databus Control", Icons.Material.Filled.Lan, _idb));
+
+        _command = new TreeItemData("Command", Icons.Material.Filled.Api);
+        TreeItems.Add(Group("Command code", Icons.Material.Filled.Hardware, _command));
+
+        _loop = new TreeItemData("LOOP", Icons.Material.Filled.LocationSearching);
+        _econd = new TreeItemData("ECOND", Icons.Material.Filled.ArrowCircleRight);
+        _scond = new TreeItemData("SCOND", Icons.Material.Filled.Shield);
+        TreeItemData<TreeItemData?> conditionControl = Group("Condition Control", Icons.Material.Filled.LocationSearching, _loop, _econd, _scond);
+
+        // TODO: Add unique icons
+        _sc_true_address = new TreeItemData("'True' Address", Icons.Material.Filled.Shield);
+        _sc_true_stack = new TreeItemData("'True' Stack", Icons.Material.Filled.Shield);
+        _sc_branching_delay = new TreeItemData("Branch delay", Icons.Material.Filled.Shield);
+        _sc_branching_vectored = new TreeItemData("Vectored branch", Icons.Material.Filled.ArrowCircleRight);
+        _sc_timing = new TreeItemData("Timing", Icons.Material.Filled.QueryBuilder);
+        // condition control sits inside sequencing, as in the micro word
+        var sequencingKids = new List<TreeItemData<TreeItemData?>>
+        {
+            Leaf(_sc_true_address), Leaf(_sc_true_stack), Leaf(_sc_branching_delay), Leaf(_sc_branching_vectored),
+            conditionControl, Leaf(_sc_timing)
+        };
+        TreeItems.Add(GroupOf("Sequencing Control", Icons.Material.Filled.Hub, sequencingKids));
+
+        _b_operand = new TreeItemData("B operand", Icons.Material.Filled.LooksTwo);
+        _a_operand = new TreeItemData("A operand", Icons.Material.Filled.LooksOne);
+        TreeItems.Add(Group("Operands", Icons.Material.Filled.Dataset, _b_operand, _a_operand));
+
+        _combined_regname = new TreeItemData("Register", Icons.Material.Filled.LocalOffer);
+        _combined_bit = new TreeItemData("Bit level", Icons.Material.Filled.LocalOffer);
+        _combined_branch = new TreeItemData("Branc address", Icons.Material.Filled.DirectionsRun);
+        _combined_pic_instr = new TreeItemData("PIC Instr", Icons.Material.Filled.Sensors);
+        _combined_test_object = new TreeItemData("Test Object", Icons.Material.Filled.TipsAndUpdates);
+        TreeItems.Add(Group("Combined data fields", Icons.Material.Filled.DataArray,
+            _combined_regname, _combined_bit, _combined_branch, _combined_pic_instr, _combined_test_object));
+
+        // Icons: https://mudblazor.com/features/icons#icons
+    }
+
+    protected override void OnParametersSet()
+    {
+        // The Microcode parameter has been updated.
+        // You can access the new value of the parameter here.
+        // Do whatever you need to do with the new value.
+
+        if (microcode != null)
+        {
+            // ALU Instruction
+            _alud.Content = microcode.aluDestination.ToString();
+            _aluf.Content = microcode.aluFunction.ToString();
+            _alus.Content = microcode.aluSource.ToString();
+
+            // ALU External Control
+            _sts.Content = microcode.stsOperation.ToString(); // 53-54
+            _alu_a.Content = microcode.RASEL.ToString(); // 50-52
+            _alu_b.Content = microcode.RBSEL.ToString(); // 48-49
+            _alu_cin.Content = microcode.cin.ToString(); // 46-47
+            _alum.Content = microcode.aluMode.ToString(); // 44-45
+            _mis.Content = microcode.MIS.ToString(); //42-43
+
+            // Internal Databus Control
+            _idb.Content = microcode.IDBsource.ToString(); // 37-41
+
+            // Command code
+            _command.Content = microcode.command.ToString(); // 32-36
+
+
+            // Sequencing
+            _sc_true_address.Content = microcode.TRUE_AddressSelect.ToString(); // 30-31
+            _sc_true_stack.Content = microcode.TRUE_StackControl.ToString(); //28-29
+
+
+            string bd = "";
+            switch (microcode.BRANCH_DELAY)
+            {
+                case NDMicroCpu.Core.Enums.BranchDelay.Normal:
+                    bd = "Normal";
+                    break;
+                case NDMicroCpu.Core.Enums.BranchDelay.ns25:
+                    bd = "+25 nS";
+                    break;
+                case NDMicroCpu.Core.Enums.BranchDelay.ns50a:
+                case NDMicroCpu.Core.Enums.BranchDelay.ns50b:
+                    bd = "+50 nS";
+                    break;
+
+                default:
+                    break;
+            }
+            _sc_branching_delay.Content = bd; // 26-27
+
+
+            _sc_branching_vectored.Content = microcode.Vectored.ToString(); //25
+
+
+            // Condition Control (part of sequencing)
+            _loop.Content = microcode.LOOP.ToString(); // 24
+            _econd.Content = microcode.ECOND.ToString(); // 23
+            _scond.Content = microcode.SCOND.ToString(); // 22
+
+            if (microcode.bit21 == 0)
+                _sc_timing.Content = "Normal";
+            else
+                _sc_timing.Content = "+25 nS";
+
+
+            // Operands
+            _b_operand.Content = microcode.bits16_19.ToString();
+            _a_operand.Content = microcode.bits12_15.ToString();
+
+            // Combined data fields
+            _combined_branch.Content = "";
+            //if (microcode.TRUE_AddressSelect == NextAddressSelect.Jump)
+            {
+                // Calculated the expected 12 bit address.
+                ushort jmpAddress = (ushort)(microcode.bits0_11 | microcode.bit20 << 12);
+                ushort newAddress = jmpAddress;
+
+                // calculcate selector
+                ushort selector = (ushort)(microcode.MIS & 0x01); // lowest bit in MIS
+                if (microcode.Vectored)
+                    selector |= 0b10; // set bit from VECTOR
+
+                // Now calculate the new JMP address
+                switch (selector)
+                {
+                    case 0:
+                    case 1:
+                        newAddress = jmpAddress;
+                        break;
+                    case 2:
+                        if (cpu != null)
+                        {
+                            newAddress = (ushort)((jmpAddress & 0xFF0) | (cpu.hw.cpu_regs.IR & 0x0F)); // low 4 bits from IR
+                        }
+                        else
+                        {
+                            newAddress = 0;
+                        }
+                        break;
+                    case 3:
+                        newAddress = (ushort)((jmpAddress & 0xFF0) | (microcode.RASEL & 0x0F)); // low 4 bits from RA (RA is bit 12-15 => Register)
+                        break;
+                }
+
+                _combined_branch.Content = Utils.Int2Oct(jmpAddress);
+            }
+
+            RegisterEnum reg = (RegisterEnum)microcode.bits12_15;
+            _combined_regname.Content = reg.ToString();
+
+            int bit = microcode.bits12_15;
+            _combined_bit.Content = bit.ToString();
+
+
+            if (microcode.command == Commands.EPIC)
+            {
+                Am2914Instruction pic = (Am2914Instruction)microcode.bits12_15;
+                _combined_pic_instr.Content = pic.ToString();
+            }
+            else
+                _combined_pic_instr.Content = "";
+
+
+            //if (microcode.SCOND)
+            {
+                _combined_test_object.Content =  microcode.SCOND_test.ToString();
+            }
+        }
+    }
+}

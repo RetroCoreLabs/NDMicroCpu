@@ -1,0 +1,27 @@
+@page "/MicroCode"
+@inject IAppService appService
+@implements IDisposable
+
+<h3>MicroCode</h3>
+<style>
+
+	#ucText {
+		height: 800px;
+	}
+
+</style>
+
+@if (!appService.IsInitialized)
+{
+	<MudAlert Severity="Severity.Error">Initializtion via INDEX page not executed. Debugger cannot continue</MudAlert>
+}
+
+<NDMicroCpu.Web.Components.MicroCodeEditor sourceCode="@appService.microCodeSource"></NDMicroCpu.Web.Components.MicroCodeEditor>
+
+
+@code {
+    // Re-render when the CPU is switched so the new microcode listing flows into the editor.
+    protected override void OnInitialized() => appService.OnCpuChanged += Refresh;
+    void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => appService.OnCpuChanged -= Refresh;
+}

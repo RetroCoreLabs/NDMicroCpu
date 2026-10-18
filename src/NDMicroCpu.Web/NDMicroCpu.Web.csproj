@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <RootNamespace>NDMicroCpu.Web</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Ahead-of-time compile the WebAssembly on publish; the micro code loop is far too slow interpreted. Needs the wasm-tools workload. -->
+    <RunAOTCompilation>true</RunAOTCompilation>
+  </PropertyGroup>
+
+  <!--
+    Stamp the UTC build time into the assembly as [AssemblyMetadata("BuildTimestampUtc", ...)].
+    Read back by Pages/Index.razor and shown in the home-page footer ("Last compiled: ...").
+    Runs before GetAssemblyAttributes so the item is picked up by GenerateAssemblyInfo; the
+    value changes every build (UtcNow), which also forces the assembly-info regeneration so
+    the stamp is always fresh.
+  -->
+  <Target Name="StampBuildTimestamp" BeforeTargets="GetAssemblyAttributes">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>BuildTimestampUtc</_Parameter1>
+        <_Parameter2>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"))</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="BlazorMonaco" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+    <PackageReference Include="MudBlazor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NDMicroCpu.Core\NDMicroCpu.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    wwwroot\Assets\ND-110-RASK-CODE.TXT, ND-110-RASK-LISTING.TXT, ND-120-DELILAH-L-CODE.TXT and
+    ND-120-DELILAH-L-LISTING.TXT are byte copies of NDMicroCpu.Core\microcode\*.CODE and
+    *.LISTING.TXT, served to the browser over HTTP (IAppService.AssetsFor). They are tracked in
+    git because the Blazor static-asset pipeline collects wwwroot at evaluation time, before any
+    build target could copy them. A test in NDMicroCpu.Core.Tests fails when they drift apart;
+    eng\sync-web-assets.ps1 refreshes them.
+  -->
+
+</Project>

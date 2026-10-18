@@ -1,0 +1,143 @@
+﻿@page "/Interrupt"
+@inject IAppService appService
+
+<MudText Typo="Typo.h3" GutterBottom="true">Interrupt controller</MudText>
+
+<style>
+.m-3-1 {
+    margin: 1px 1px 1px 3px;
+}
+</style>
+<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Dense="true" Text="ND-100 Interrupt Controller Info">
+        <MudContainer>
+            <MudGrid Class="mt-1">
+                <MudItem md="6">
+                    <MudCard Elevation="25" Class="rounded-lg pb-4">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">ND-100 Schematics</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudImage Src="Assets/ND100PIC_small.png"></MudImage>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem md="6">
+                    <MudCard Elevation="25" Class="rounded-lg pb-4">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">Am2914</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudImage Src="Assets/Am2914.png"></MudImage>
+                            <br />
+                            The Am2914 is a high-speed, eight-bit priority interrupt unit.
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem md="12">
+                    <MudCard Elevation="25" Class="rounded-lg pb-4">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">Description</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            The ND-100 diagrams for the <MudLink Href="http://ndwiki.org/wiki/3002" Typo="Typo.body2" Color="Color.Inherit"><b>ND-100 CPU Card 3002</b></MudLink>
+                            shows that there is two Am2914 Priority Interrupt Controller's cascaded together to have a total of 16 interrupt levels.
+
+                            <br />
+                            When looking at the schematics you will learn that there is not a 1:1 mapping between Interrupt pins on the Am2914 and the Levels in the ND machine.
+                            <br />
+                            The Microcode is doing some mapping together with some of the registers in the RegisterFile (the PID and PIE registers) to identify what level to be on.
+
+                            <MudPaper Elevation="25" Class="rounded-lg pb-4">
+                                <MudTable Dense="true" Bordered="true" Striped="true" Items="@MyData" Hover="true">
+                                    <HeaderContent>
+                                        <MudTh>Input</MudTh>
+                                        <MudTh>Name</MudTh>
+                                        <MudTh>Mapped to ND levels</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTh>@context.Input</MudTh>
+                                        <MudTh>@context.Name</MudTh>
+                                        <MudTh>@context.NDLevel</MudTh>
+                                    </RowTemplate>
+                                </MudTable>
+                            </MudPaper>
+
+
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </MudExpansionPanel>
+    <MudExpansionPanel Expanded Dense="true" Text="Emulator Interrupt Controller">
+
+        <MudPaper Elevation="25" Class="rounded-lg pb-4">
+            <MudButton Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt10">Trigger Interrupt 10</MudButton> <br />
+            <MudButton Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt11">Trigger Interrupt 11</MudButton>  <br />
+            <MudButton Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt12">Trigger Interrupt 12</MudButton>  <br />
+            <MudButton Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt13">Trigger Interrupt 13</MudButton>  <br />            
+        </MudPaper>
+        <br />
+    </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+    @code {
+
+    void onInt10()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT10);
+    }
+    
+    void onInt11()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT11);
+    }
+    
+    void onInt12()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT12);
+    }
+    void onInt13()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT13);
+    }
+    
+    private List<NDInterruptInfo> MyData = new List<NDInterruptInfo>
+    {
+        new NDInterruptInfo { Input = 15, Name ="BINT15", NDLevel="14" },
+        new NDInterruptInfo { Input = 14, Name ="BINT14", NDLevel="10-13 enables 14 also" },
+        new NDInterruptInfo { Input = 13, Name ="POWFAIL", NDLevel="" },
+        new NDInterruptInfo { Input = 12, Name ="NOR", NDLevel="" },
+        new NDInterruptInfo { Input = 11, Name ="PARERR", NDLevel="" },
+        new NDInterruptInfo { Input = 10, Name ="IOXERR", NDLevel="" },
+        new NDInterruptInfo { Input = 9, Name ="II6", NDLevel="" },
+        new NDInterruptInfo { Input = 8, Name ="Z", NDLevel="" },
+        new NDInterruptInfo { Input = 7, Name ="ROR", NDLevel="" },
+        new NDInterruptInfo { Input = 6, Name ="PAGEF", NDLevel="" },
+        new NDInterruptInfo { Input = 5, Name ="PROTV", NDLevel="" },
+        new NDInterruptInfo { Input = 4, Name ="n/a", NDLevel="" },
+        new NDInterruptInfo { Input = 3, Name ="BINT13", NDLevel="13" },
+        new NDInterruptInfo { Input = 2, Name ="BINT12", NDLevel="12" },
+        new NDInterruptInfo { Input = 1, Name ="BINT11", NDLevel="11" },
+        new NDInterruptInfo { Input = 0, Name ="BINT10", NDLevel="10" }
+
+
+    };
+
+    private class NDInterruptInfo
+    {
+        public int Input { get; set; }
+        public string? Name { get; set; }
+        public string? NDLevel { get; set; }
+    }
+}
+
+

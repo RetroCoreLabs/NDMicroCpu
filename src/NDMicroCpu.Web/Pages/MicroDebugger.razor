@@ -1,0 +1,586 @@
+@page "/Debugger"
+@using NDMicroCpu.Core;
+@using static NDMicroCpu.Core.Enums;
+@inject IAppService appService
+@implements IDisposable
+
+
+
+@if (!appService.IsInitialized)
+{
+    <MudContainer Class="mt-16">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">Loading MicroCode Debugger...</MudText>
+        <div class="d-flex justify-center mt-8">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        </div>
+        <MudText Align="Align.Center" Class="mt-4">Downloading microcode files and initializing CPU...</MudText>
+    </MudContainer>
+}
+else
+{
+
+
+<style>
+
+    .border-always {
+        border: 1px solid;
+        white-space: pre-wrap;
+    }
+
+
+    .decorationGlyphMarginClassRed {
+        background: red;
+    }
+
+    .decorationGlyphMarginClass {
+        background: black;
+    }
+
+    .decorationContentClass {
+        background: lightblue;
+    }
+</style>
+
+
+<PageTitle>MicroCode Debugger</PageTitle>
+
+<div>
+    <MudExpansionPanels>
+        <MudExpansionPanel Dense=" true" Text="Registers">
+            <MudGrid Class="mt-1">
+                <MudItem xs="4">
+                    <MudCard Elevation="25" Class="rounded-lg pb-1">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">ALU RAM</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <NDMicroCpu.Web.Components.RegistersView @ref="_registersView" RegisterLevel="0" RegisterFile="appService.Cpu.hw.alu.ALURAM"></NDMicroCpu.Web.Components.RegistersView>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudCard Elevation="25" Class="rounded-lg pb-1">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">ALU internal registers</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <NDMicroCpu.Web.Components.AluInternalRegistersView @ref="_aluView" BufAlu="appService.Cpu.hw.alu"></NDMicroCpu.Web.Components.AluInternalRegistersView>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudCard Elevation="25" Class="rounded-lg pb-1">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5" Align="Align.Center">CPU</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>                                                        
+                            <NDMicroCpu.Web.Components.CpuInternalRegistersView @ref="_cpuRegView" Cpu="appService.Cpu"></NDMicroCpu.Web.Components.CpuInternalRegistersView>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+            <br />
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+
+    @*    <MudContainer>
+    <MudGrid Class="mt-1">
+    <MudItem md="5">
+    <MudText Typo="Typo.h5" Align="Align.Center">ALU RAM</MudText>
+    <NDMicroCpu.Web.Components.Registers></NDMicroCpu.Web.Components.Registers>
+    </MudItem>
+    <MudItem md="5">
+    <MudText Typo="Typo.h5" Align="Align.Center">ALU REGS</MudText>
+    <NDMicroCpu.Web.Components.AluRegisters></NDMicroCpu.Web.Components.AluRegisters>
+    </MudItem>
+    </MudGrid>
+    </MudContainer>*@
+
+
+
+    <MudContainer Fixed="false" MaxWidth="MaxWidth.ExtraExtraLarge">
+        <MudGrid Class="mt-3">
+            <MudItem md="12">
+                <MudCard Elevation="25" Class="rounded-lg pb-4">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">ND-110 Microcode</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <NDMicroCpu.Web.Components.MicroCodeEditor sourceCode="@appService.microCodeSource" @ref="_mcEdit"></NDMicroCpu.Web.Components.MicroCodeEditor>
+                    </MudCardContent>
+
+                    <MudCardActions Class="m-3">
+                        <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled">
+                            <MudButton Class="mr-2" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowCircleRight" OnClick="onStep">Step</MudButton>
+                            <MudButton Class="mr-2" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.RunCircle" OnClick="onRun">Run</MudButton>
+                            <MudButton Class="mr-2" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Replay" OnClick="onReset">Reset</MudButton>
+                        </MudButtonGroup>
+                        <MudButtonGroup Class="mr-4" Color="Color.Secondary" Variant="Variant.Filled">
+                            <MudButton Class="mr-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AlarmAdd" OnClick="onBreakpoint">Add Breakpoint</MudButton>
+
+                        </MudButtonGroup>
+
+                        <MudButtonGroup Class="mr-4" Color="Color.Tertiary" Variant="Variant.Filled">
+                            <MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onLoadUcAddress">Load ucAddress</MudButton>
+                            <MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onLoadOpcode">Load OpCode Direct</MudButton>
+                            <MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onLoadFromRam">Load OpCode from Memory</MudButton>
+                            <MudTextField Class="mr-2" MaxLength="6" @bind-Value="@memOctAddress" Variant="Variant.Outlined" HelperText="Memory address or opcode value" Margin="Margin.Dense" />
+                            <MudCheckBox Class="mr-2" Label="Logging" @bind-Value="@appService.LoggingEnabled"></MudCheckBox>
+                        </MudButtonGroup>
+                        <br />
+                        <br />
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+
+    <br />
+    <MudContainer Fixed="false" MaxWidth="MaxWidth.ExtraExtraLarge">
+        <MudExpansionPanels Style="flex: 1;">
+            <MudExpansionPanel Text="Show log">
+
+                @if (appService.cpuLog.Count > 0)
+                {
+                    <div class="d-flex">
+                        <MudSpacer />
+                        <MudButton Class="mt-3" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="onClearLog" EndIcon="@Icons.Material.Filled.Delete">Clear logs</MudButton>
+                    </div>
+                }
+
+                @for (int logIdx = 0; logIdx < appService.cpuLog.Count; logIdx++)
+                {
+                    <MudText>@appService.cpuLog[logIdx]</MudText>
+                }
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudContainer>
+    <br />
+    <MudContainer Fixed="false" MaxWidth="MaxWidth.ExtraExtraLarge">
+        <MudGrid Class="mt-0">
+            <MudItem md="5">
+                <MudCard Elevation="25" Class="rounded-lg pb-4">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">Decoded</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+
+                        <NDMicroCpu.Web.Components.MicroCodeInspector cpu="@appService.Cpu" microcode="@_microcode"></NDMicroCpu.Web.Components.MicroCodeInspector>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem md="6">
+                <MudCard Elevation="25" Class="rounded-lg pb-4">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">PIC & Breakpoints</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+
+                    <MudCardContent>
+                        <NDMicroCpu.Web.Components.PicInternalRegistersView @ref="_picView" Cpu=" appService.Cpu"></NDMicroCpu.Web.Components.PicInternalRegistersView>
+                        <br />
+
+                        <MudContainer>
+                            <MudButtonGroup class="d-flex justify-content-center" Color="Color.Tertiary" Variant="Variant.Filled">
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt15">Int 15</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt14">Int 14</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt13">Int 13</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt12">Int 12</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt11">Int 11</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onInt10">Int 10</MudButton>
+                            </MudButtonGroup>
+
+                            <MudButtonGroup class="d-flex justify-content-center" Color="Color.Secondary" Variant="Variant.Filled">
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(13))">POW</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(12))">MOR</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(11))">PTY</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(10))">IOX</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(9))">PI</MudButton>
+                            </MudButtonGroup>
+
+
+                            <MudButtonGroup class="d-flex justify-content-center" Color="Color.Secondary" Variant="Variant.Filled">
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(8))">Z</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(7))">ROR/II</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(6))">PAGEF</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(5))">PROTV</MudButton>
+                                <MudButton Class="mr-2 mt-2 mb-2" Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => onInt(4))">MC</MudButton>
+                            </MudButtonGroup>
+
+                        </MudContainer>
+                        @if (appService.BreakPoints.Count > 0)
+                        {
+                            <div class="d-flex">
+                                <MudSpacer />
+                                <MudButton Class="mt-3" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="onClearBreakpoints" EndIcon="@Icons.Material.Filled.Delete">Clear all breakpoints</MudButton>
+                            </div>
+
+
+                            List<string> breakpointLines = appService.BreakPoints.ListBreakpoints();
+                            for (int bpIdx = 0; bpIdx < breakpointLines.Count; bpIdx++)
+                            {
+                                <MudText>@breakpointLines[bpIdx]</MudText>
+                            }
+                        }
+                    </MudCardContent>
+
+                </MudCard>
+            </MudItem>
+
+        </MudGrid>
+    </MudContainer>
+</div>
+}
+
+@code {
+    private NDMicroCpu.Web.Components.MicroCodeEditor? _mcEdit { get; set; }
+    private NDMicroCpu.Core.MicroCode? _microcode { get; set; }
+
+    private NDMicroCpu.Web.Components.RegistersView? _registersView;
+    private NDMicroCpu.Web.Components.AluInternalRegistersView? _aluView;
+    private NDMicroCpu.Web.Components.CpuInternalRegistersView? _cpuRegView;
+    private NDMicroCpu.Web.Components.PicInternalRegistersView? _picView;
+
+
+    private string memOctAddress
+    {
+        get => Utils.Int2Oct(appService.memAddress);
+        set => appService.memAddress = Utils.Oct2Int(value);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Wait for initialization to complete (App.razor started it, but may not be done yet)
+        await appService.InitializeAsync();
+        // Refresh when the CPU is switched so the debugger shows the new machine's microcode.
+        appService.OnCpuChanged += Refresh;
+        // Trigger re-render to show the debugger UI once initialization is complete
+        StateHasChanged();
+    }
+
+    void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => appService.OnCpuChanged -= Refresh;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Wait for the next render cycle to ensure that the StandaloneCodeEditor
+            // component has been rendered before we try to set the Active lines
+            await Task.Delay(1);
+
+            LoadAndDecode((ushort)appService.memAddress);
+            StateHasChanged();
+        }
+
+
+    }
+
+
+    /// <summary>
+    /// Loads the micro word at an address into the view and, when asked, decodes it into the inspector.
+    /// </summary>
+    /// <param name="address">
+    /// The control store address.
+    /// </param>
+    /// <param name="decode">
+    /// False loads the word without decoding it.
+    /// </param>
+    async void LoadAndDecode(int address, bool decode = true)
+    {
+        try
+        {
+            if (appService is null) return;
+            if (appService.microCodeLines is null) return;
+
+            if (address < 0)
+            {
+                appService.cpuLog.Add("Execution finished");
+                return; // Nothing more to do
+            }
+
+            appService.Cpu.hw.mic.LatchMap((ushort)address);
+            appService.Cpu.LoadMicroCode();
+            _microcode = appService.Cpu.microCode;
+
+
+            if (decode)
+            {
+                MicroCodeLineInfo? mi;
+
+                if (appService.microCodeLines.TryGetValue(appService.memAddress, out mi))
+                {
+                    if (_mcEdit != null)
+                    {
+                        // Set the lines in the editor active
+                        await _mcEdit.SetActiveLines(mi.FirstLine, mi.LastLine);
+                    }
+                }
+                else
+                {
+                    appService.cpuLog.Add($"Microcode address {Utils.Int2Oct(address)} not found in sourcecode ?!");
+
+                    if (_mcEdit != null)
+                    {
+                        // Clear
+                        await _mcEdit.SetActiveLines(0, 0);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            Utils.Log($"Exception: {ex}");
+        }
+
+    }
+
+    /// <summary>
+    /// Clear all "changed markers" in UI fields.
+    /// </summary>
+    void ResetUI()
+    {
+        _registersView?.ResetUI();
+        _aluView?.ResetUI();
+        _cpuRegView?.ResetUI();
+        _picView?.ResetUI();
+    }
+
+    #region Handle Button Events
+
+    void onReset()
+    {
+        appService.Cpu.hw.alu.Clear();
+        appService.memAddress = 0;
+        LoadAndDecode((ushort)appService.memAddress);
+        ResetUI();
+    }
+    void onStep()
+    {
+        if (appService.memAddress < 0)
+        {
+            Utils.LogAlways("Cant [step] from here");
+            return;
+        }
+
+        int lastValidAddress = appService.memAddress;
+        ResetUI();
+        appService.Cpu.StepMicroCode();
+        appService.memAddress = appService.Cpu.hw.mic.map;
+
+
+        if (appService.Cpu.hw.mac.FETCH) // stopped at a FETCH operation
+        {
+            appService.memAddress = lastValidAddress;
+            appService.cpuLog.Add($"Next is FETCH!");
+        }
+
+        LoadAndDecode(appService.memAddress);
+    }
+
+    void onRun()
+    {
+
+        if (appService.memAddress < 0)
+        {
+            Utils.LogAlways("Cant [run] from here");
+            return;
+        }
+
+
+        ResetUI();
+
+        const int MAX_CYCLE = 10000;
+        int cpuCycles = 0;
+        bool stop = false;
+        int lastValidAddress = 0;
+        do
+        {
+
+            appService.Cpu.StepMicroCode();
+            appService.memAddress = appService.Cpu.hw.mic.map;
+            cpuCycles++;
+
+            if (appService.Cpu.hw.mac.FETCH == true)
+            {
+                appService.cpuLog.Add($"Stopped after {cpuCycles} cycles! Next is FETCH!");
+                stop = true;
+            }
+            else
+            {
+                lastValidAddress = appService.memAddress;
+                LoadAndDecode(appService.memAddress, false);
+            }
+
+            if (appService.BreakPoints.IsBreakpoint(appService.memAddress, BreakpointType.Execution))
+            {
+                appService.cpuLog.Add($"Stopped at breakpoint at {Utils.Int2Oct(appService.memAddress)}");
+                stop = true;
+            }
+            else
+            {
+
+                if (cpuCycles >= MAX_CYCLE)
+                {
+                    appService.cpuLog.Add($"Stopped after MAX {cpuCycles} cycles at {Utils.Int2Oct(appService.memAddress)}");
+                    stop = true;
+                }
+            }
+
+        } while (!stop);
+
+
+        if (appService.Cpu.hw.mac.FETCH) // stopped at a FETCH operation
+            appService.memAddress = lastValidAddress;
+
+        LoadAndDecode(appService.memAddress);
+
+    }
+
+    void onClearLog()
+    {
+        ResetUI();
+        appService.cpuLog.Clear();
+    }
+
+    async void onBreakpoint()
+    {
+        if (_mcEdit == null) return;
+
+        MicroCodeLineInfo? mi;
+
+        if (appService.microCodeLines != null)
+        {
+            if (appService.microCodeLines.TryGetValue(appService.memAddress, out mi))
+            {
+
+                if (appService.BreakPoints.IsBreakpoint(appService.memAddress, BreakpointType.Execution))
+                {
+                    // Remove breakpoint
+                    var decor = appService.BreakPoints.GetDecorationID(appService.memAddress);
+
+                    //await _mcEdit.SetActiveLines(mi.FirstLine, mi.LastLine);
+                    await _mcEdit.RemoveLineBreakpoint(decor!);
+                    appService.BreakPoints.RemoveBreakpoint((ushort)appService.memAddress, BreakpointType.Execution);
+
+                }
+                else
+                {
+                    // Set breakpoint
+                    _mcEdit.bpdecorationIds = null;
+
+                    await _mcEdit.SetLineBreakpoint(mi.LastLine);
+                    //await _mcEdit.SetActiveLines(mi.FirstLine, mi.LastLine);
+
+                    appService.BreakPoints.AddBreakpoint((ushort)appService.memAddress, BreakpointType.Execution, "", _mcEdit.bpdecorationIds);
+                }
+            }
+            StateHasChanged();
+        }
+    }
+
+    void onClearBreakpoints()
+    {
+        appService.BreakPoints.ClearBreakpoints();
+        StateHasChanged();
+    }
+
+
+    void onLoadUcAddress()
+    {
+        appService.LogMsg($"Loading micro address {Utils.Int2Oct((ushort)appService.memAddress)}", true);
+
+        LoadAndDecode(appService.memAddress);
+    }
+
+    void onLoadOpcode()
+    {
+        appService.LogMsg($"Loading opcode {Utils.Int2Oct((ushort)appService.memAddress)}", true);
+
+        // Loading OpCode via "reused variable [memAddress]"
+        appService.Cpu.Fetch((ushort)appService.memAddress);
+        appService.memAddress = appService.Cpu.hw.mic.map;
+        LoadAndDecode(appService.memAddress);
+        StateHasChanged();
+    }
+
+    void onLoadFromRam()
+    {
+        ushort ramAddress = (ushort)appService.memAddress;
+
+        if (appService.Cpu.memory.ValidAddress(ramAddress))
+        {
+
+            // Loading P via "reused variable [memAddress]", then loading opocde from RAM address
+            appService.LogMsg($"Loading opcode from RAM at {Utils.Int2Oct(ramAddress)}", true);
+            // P = address
+
+            // The P register points to the next machine instruction.
+            appService.Cpu.hw.alu.WriteRegister((ushort)RegisterEnum.P, ramAddress);
+            appService.Cpu.hw.mac.mac_address = ramAddress;
+
+            ushort operand = appService.Cpu.memory.ReadPhysicalMemory(ramAddress);
+            appService.Cpu.Fetch(operand);
+
+            appService.memAddress = appService.Cpu.hw.mic.map;
+            LoadAndDecode((ushort)appService.memAddress);
+            StateHasChanged();
+
+        }
+        else
+        {
+            appService.LogMsg($"Cannot load opcode from RAM at {Utils.Int2Oct((ushort)appService.memAddress)} - Invalid address", true);
+        }
+
+
+    }
+
+
+    void onInt10()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT10);
+    }
+
+    void onInt11()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT11);
+    }
+
+    void onInt12()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT12);
+    }
+    void onInt13()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT13);
+    }
+
+    void onInt14()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT14);
+    }
+
+    void onInt15()
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(InterruptPin.INT15);
+    }
+
+    void onInt(int i)
+    {
+        appService.Cpu.hw.pic.SetInterruptPIN(i);
+    }
+    #endregion Handle Button Events
+}

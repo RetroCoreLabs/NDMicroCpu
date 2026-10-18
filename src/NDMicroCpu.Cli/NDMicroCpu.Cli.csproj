@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Command-line tool: lowercase, short, what it does (NAMING.md). -->
+    <AssemblyName>ndmicrocli</AssemblyName>
+    <RootNamespace>NDMicroCpu.Cli</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Drives the working micro code CPU (covers ND-110 and ND-120). -->
+    <ProjectReference Include="..\NDMicroCpu.Core\NDMicroCpu.Core.csproj" />
+  </ItemGroup>
+
+</Project>

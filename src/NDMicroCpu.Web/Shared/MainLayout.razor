@@ -1,0 +1,57 @@
+@inherits LayoutComponentBase
+@inject NDMicroCpu.Web.Services.IAppService appService
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">ND-110 MicroCode Emulator</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <MudDrawerHeader>
+            <MudImage Src="Assets/Logo_ND.png" style="width:135px; height:60px;" Alt="ND" />
+        </MudDrawerHeader>
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Fixed="true" Class="my-4 pt-4">
+            @* Gate EVERY page on initialization. MainLayout wraps every route, so a direct
+               deep-link (e.g. /Debugger, /Terminal) waits here until the microcode ROM +
+               listing are loaded - no page ever renders against an un-loaded control store. *@
+            @if (appService.IsInitialized)
+            {
+                @Body
+            }
+            else
+            {
+                <div class="d-flex flex-column align-center justify-center" style="min-height:50vh;">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    <MudText Class="mt-4">Loading microcode…</MudText>
+                </div>
+            }
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    bool _drawerOpen = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Drive initialization from the layout too (idempotent). Because MainLayout wraps every
+        // route, this guarantees the microcode is loaded regardless of which page was entered
+        // directly, and the gate above re-renders to the page once loading completes.
+        await appService.InitializeAsync();
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

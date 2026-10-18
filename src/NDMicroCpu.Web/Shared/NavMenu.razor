@@ -1,0 +1,22 @@
+﻿<MudNavMenu  Bordered="true">
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Home</MudNavLink>
+    <MudNavGroup Title="MicroCode" Icon="@Icons.Material.Filled.Deblur" Expanded="true">
+        <MudNavLink Href="Debugger" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BugReport">Micro Debugger</MudNavLink>    
+        <MudNavLink Href="MicroCode" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.FormatAlignLeft">View MicroCode</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup IconColor="Color.Success" Title="Hardware" Icon="@Icons.Material.Filled.BlurOn"  Expanded="true">
+        <MudNavLink IconColor="Color.Success" Href="CpuRegisters" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DynamicFeed">Registerfile</MudNavLink>
+        <MudNavLink IconColor="Color.Success" Href="AluFunc" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Grade">ALU</MudNavLink>
+        <MudNavLink IconColor="Color.Success" Href="Interrupt" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Bolt">Interrupts</MudNavLink>
+    </MudNavGroup>
+    
+    <MudNavGroup IconColor="Color.Info" Title="ND Machine" Icon="@Icons.Material.Filled.Storage"  Expanded="true">
+        <MudNavLink Href="Memory" IconColor="Color.Info"  Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Memory">RAM</MudNavLink>
+        <MudNavLink Href="ND110Debugger" IconColor="Color.Info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BugReport">ND-110 Debugger</MudNavLink>
+        <MudNavLink Href="Terminal" IconColor="Color.Info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Monitor">Terminal</MudNavLink>
+        <MudNavLink Href="FloppyDrive" IconColor="Color.Info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Save">Floppy drive</MudNavLink>
+    </MudNavGroup>
+
+    @* CPU selection (ND-110 / ND-120) - remembered in localStorage; drives ROM + listing. *@
+    <CpuPreferences />
+</MudNavMenu>

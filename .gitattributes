@@ -1,0 +1,14 @@
+* text=auto
+# Control store images, program images and the web emulator's copies of them (served as .TXT but
+# binary inside) must never have their bytes touched on checkout.
+*.CODE binary
+*-CODE.TXT binary
+*.BPUN binary
+*.bpun binary
+*.pdf binary
+*.png binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+# PROM dumps in the prom.hex text format are compared byte for byte; keep their LF line ends.
+*.hex -text

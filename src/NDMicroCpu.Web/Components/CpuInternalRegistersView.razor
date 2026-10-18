@@ -1,0 +1,383 @@
+﻿@implements IDisposable
+
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[0].ReadOnly" @bind-Value="@element.R[0].OctalValue" Label="@element.R[0].Label" Variant="Variant.Outlined" title="@element.R[0].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[0].adornment" />
+            <MudTextField ReadOnly="@element.R[1].ReadOnly" @bind-Value="@element.R[1].OctalValue" Label="@element.R[1].Label" Variant="Variant.Outlined" title="@element.R[1].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[1].adornment" />
+            <MudTextField ReadOnly="@element.R[2].ReadOnly" @bind-Value="@element.R[2].OctalValue" Label="@element.R[2].Label" Variant="Variant.Outlined" title="@element.R[2].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[2].adornment" />
+            <MudTextField ReadOnly="@element.R[3].ReadOnly" @bind-Value="@element.R[3].OctalValue" Label="@element.R[3].Label" Variant="Variant.Outlined" title="@element.R[3].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[3].adornment" />
+            <MudTextField ReadOnly="@element.R[4].ReadOnly" @bind-Value="@element.R[4].OctalValue" Label="@element.R[4].Label" Variant="Variant.Outlined" title="@element.R[4].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[4].adornment" />
+            <MudTextField ReadOnly="@element.R[5].ReadOnly" @bind-Value="@element.R[5].OctalValue" Label="@element.R[5].Label" Variant="Variant.Outlined" title="@element.R[5].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[5].adornment" />
+            <MudTextField ReadOnly="@element.R[6].ReadOnly" @bind-Value="@element.R[6].OctalValue" Label="@element.R[6].Label" Variant="Variant.Outlined" title="@element.R[6].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[6].adornment" />
+            <MudTextField ReadOnly="@element.R[7].ReadOnly" @bind-Value="@element.R[7].OctalValue" Label="@element.R[7].Label" Variant="Variant.Outlined" title="@element.R[7].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[7].adornment" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[8].ReadOnly" @bind-Value="@element.R[8].OctalValue" Label="@element.R[8].Label" Variant="Variant.Outlined" title="@element.R[8].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[8].adornment" />
+            <MudTextField ReadOnly="@element.R[9].ReadOnly" @bind-Value="@element.R[9].OctalValue" Label="@element.R[9].Label" Variant="Variant.Outlined" title="@element.R[9].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[9].adornment" />
+            <MudTextField ReadOnly="@element.R[10].ReadOnly" @bind-Value="@element.R[10].OctalValue" Label="@element.R[10].Label" Variant="Variant.Outlined" title="@element.R[10].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[10].adornment" />
+            <MudTextField ReadOnly="@element.R[11].ReadOnly" @bind-Value="@element.R[11].OctalValue" Label="@element.R[11].Label" Variant="Variant.Outlined" title="@element.R[11].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[11].adornment" />
+            <MudTextField ReadOnly="@element.R[12].ReadOnly" @bind-Value="@element.R[12].OctalValue" Label="@element.R[12].Label" Variant="Variant.Outlined" title="@element.R[12].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[12].adornment" />
+            <MudTextField ReadOnly="@element.R[13].ReadOnly" @bind-Value="@element.R[13].OctalValue" Label="@element.R[13].Label" Variant="Variant.Outlined" title="@element.R[13].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[13].adornment" />
+            <MudTextField ReadOnly="@element.R[14].ReadOnly" @bind-Value="@element.R[14].OctalValue" Label="@element.R[14].Label" Variant="Variant.Outlined" title="@element.R[14].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[14].adornment" />
+            <MudTextField ReadOnly="@element.R[15].ReadOnly" @bind-Value="@element.R[15].OctalValue" Label="@element.R[15].Label" Variant="Variant.Outlined" title="@element.R[15].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[15].adornment" />
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>
+
+
+@code {
+
+    [Parameter]
+    public CPU? Cpu { get; set; }
+
+    public enum CpuFieldID
+    {
+        ARG,
+        Operand,
+        IR,
+        IO,
+        DBR,
+        LC,
+        BMG,
+        PIL,
+
+        // ---
+
+        Stack0,
+        Stack1,
+        Stack2,
+        Stack3,
+
+        PCR, // Paging Control Register (on PIL level)
+        PGS, // Paging status extended
+        PEA, // Parity Error Address
+        PES, // Parity Error Source
+        MAX
+    }
+
+    public CpuRegs element = new CpuRegs();
+
+    public class CpuRegs : IDisposable
+    {
+        CPU? _cpu { get; set; }
+        public Register[] R;
+
+        public CpuRegs()
+        {
+            //int max = (int)AluFieldID.MAX+1;
+            int max = 16;
+            R = new Register[max];
+            for (ushort i = 0; i < max; i++)
+            {
+                CpuFieldID field = (CpuFieldID)i;
+                string label = field.ToString();
+                R[i] = new Register(i, label);
+                ushort regval = ReadRegister(field);
+
+                R[i].SetDescription(ReadRegisterDescription(field));
+                R[i].ReadOnly = IsReadOnly(field);
+
+                R[i].UpdateValue(regval, false);
+
+                R[i].OnReadRegister += ReadRegisterEventHandler;
+                R[i].OnWriteRegister += WriteRegisterEventHandler;
+            }
+        }
+
+        internal void SetCpu(CPU cpu)
+        {
+            _cpu = cpu;
+        }
+
+        ushort ReadRegister(CpuFieldID id)
+        {
+            if (_cpu is null) return 0;
+            int val = 0;
+
+            switch (id)
+            {
+                case CpuFieldID.ARG:
+                    val = _cpu.hw.cpu_regs.ARG;
+                    break;
+
+                case CpuFieldID.Operand:
+                    val = _cpu.hw.cpu_regs.Operand;
+                    break;
+
+                case CpuFieldID.IR:
+                    val = _cpu.hw.cpu_regs.IR;
+                    break;
+                case CpuFieldID.IO:
+                    val = _cpu.hw.cpu_regs.IO;
+                    break;
+                case CpuFieldID.DBR:
+                    val = _cpu.hw.cpu_regs.DBR;
+                    break;
+                case CpuFieldID.LC:
+                    val = _cpu.hw.mic.LC;
+                    break;
+                case CpuFieldID.BMG:
+                    val = _cpu.hw.alu.BMG();
+                    break;
+                case CpuFieldID.PIL:
+                    val = _cpu.hw.alu.PIL;
+                    break;
+                case CpuFieldID.Stack0:
+                    val = _cpu.hw.mic.GetStackValue(0);
+                    break;
+                case CpuFieldID.Stack1:
+                    val = _cpu.hw.mic.GetStackValue(1);
+                    break;
+                case CpuFieldID.Stack2:
+                    val = _cpu.hw.mic.GetStackValue(2);
+                    break;
+                case CpuFieldID.Stack3:
+                    val = _cpu.hw.mic.GetStackValue(3);
+                    break;
+                case CpuFieldID.PCR:
+                    val = _cpu.hw.RF3.UIRead((ushort)_cpu.hw.alu.PIL, (ushort)0);
+                    //val = _cpu.hw.cpu_regs.PCR;
+                    break;
+
+                case CpuFieldID.PGS:
+                    // 10; 13; AB,PGS   ; COPY OF PGS FROM LAST PF/PV
+                    //val = _cpu.hw.RF.Read(10, 13);
+                    val = _cpu.hw.cpu_regs.PGS; // Memory management HW regs
+                    break;
+
+                case CpuFieldID.PEA:
+                    val = _cpu.hw.cpu_regs.PEA;
+                    break;
+
+                case CpuFieldID.PES:
+                    val = _cpu.hw.cpu_regs.PES;
+                    break;
+
+                default:
+                    break;
+            }
+            return (ushort)val;
+        }
+
+        string ReadRegisterDescription(CpuFieldID id)
+        {
+            string val = "";
+
+            switch (id)
+            {
+                case CpuFieldID.ARG:
+                    val = "The 16 lower bits of the microinstruction";
+                    break;
+                case CpuFieldID.Operand:
+                    val = "Operand - the 16 bit macrocode operand";
+                    break;
+
+                case CpuFieldID.IR:
+                    val = "IR - Instruction Register (Bit 0-10 of the macrocode instruction will be loaded into the register)";
+                    break;
+                case CpuFieldID.IO:
+                    val = "IO register used by IOX";
+                    break;
+                case CpuFieldID.DBR:
+                    val = "DataBus/cache read register";
+                    break;
+                case CpuFieldID.LC:
+                    val = "Loop counter";
+                    break;
+                case CpuFieldID.BMG:
+                    val = "Bit—mask generator. Outputs 1 bit, the position of the bit is controlled by the A operand.";
+                    break;
+                case CpuFieldID.PIL:
+                    val = "Current Program Level Indicator, bit 11-8 in the Status register";
+                    break;
+                case CpuFieldID.Stack0:
+                    val = "Stack position 0 (top)";
+                    break;
+                case CpuFieldID.Stack1:
+                    val = "Stack position 1";
+                    break;
+                case CpuFieldID.Stack2:
+                    val = "Stack position 2";
+                    break;
+                case CpuFieldID.Stack3:
+                    val = "Stack position 3 (bottom)";
+                    break;
+
+                case CpuFieldID.PCR:
+                    val = "Paging Control Register (via PIL)";
+                    break;
+
+                case CpuFieldID.PGS:
+                    val = "Paging Status Register - COPY OF PGS FROM LAST PF/PV - RegisterFile(10,13) ";
+                    break;
+
+                case CpuFieldID.PEA:
+                    val = "Parity Error Address";
+                    break;
+
+                case CpuFieldID.PES:
+                    val = "Parity Error Source";
+                    break;
+
+                default:
+                    val = "Unused field";
+                    break;
+            }
+            return val;
+        }
+
+
+        bool IsReadOnly(CpuFieldID id)
+        {
+            switch (id)
+            {
+                // List of readonly fields
+                case CpuFieldID.BMG:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        void WriteRegister(CpuFieldID id, ushort val)
+        {
+            if (_cpu is null) return;
+
+
+            switch (id)
+            {
+                case CpuFieldID.ARG:
+                    _cpu.hw.cpu_regs.ARG = val;
+                    break;
+
+                case CpuFieldID.Operand:
+                    _cpu.hw.cpu_regs.Operand = val;
+                    break;
+
+                case CpuFieldID.IR:
+                    _cpu.hw.cpu_regs.IR = val;
+                    break;
+                case CpuFieldID.IO:
+                    _cpu.hw.cpu_regs.IO = val;
+                    break;
+                case CpuFieldID.DBR:
+                    _cpu.hw.cpu_regs.DBR = val;
+                    break;
+                case CpuFieldID.LC:
+                    _cpu.hw.mic.loopCounter = val;
+                    break;
+                case CpuFieldID.BMG:
+                    //_cpu.hw.alu.BMG()
+                    break;
+                case CpuFieldID.PIL:
+                    val = _cpu.hw.alu.PIL;
+                    break;
+                case CpuFieldID.Stack0:
+                    _cpu.hw.mic.SetStackValue(0, val);
+                    break;
+                case CpuFieldID.Stack1:
+                    _cpu.hw.mic.SetStackValue(1, val);
+                    break;
+                case CpuFieldID.Stack2:
+                    _cpu.hw.mic.SetStackValue(2, val);
+                    break;
+                case CpuFieldID.Stack3:
+                    _cpu.hw.mic.SetStackValue(3, val);
+                    break;
+                case CpuFieldID.PCR:
+                    _cpu.hw.RF3.UIWrite((ushort)_cpu.hw.alu.PIL, (ushort)0, val);
+                    //val = _cpu.hw.cpu_regs.PCR;
+                    break;
+
+                case CpuFieldID.PGS:
+                    // 10; 13; AB,PGS   ; COPY OF PGS FROM LAST PF/PV
+                    //val = _cpu.hw.RF.Read(10, 13);
+                    _cpu.hw.cpu_regs.PGS = val; // Memory management HW regs
+                    break;
+
+                case CpuFieldID.PEA:
+                    _cpu.hw.cpu_regs.PEA = val;
+                    break;
+
+                case CpuFieldID.PES:
+                    _cpu.hw.cpu_regs.PES = val;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+
+        public void Dispose()
+        {
+            int max = 16;
+            for (int i = 0; i < max; i++)
+            {
+                R[i].OnReadRegister -= ReadRegisterEventHandler;
+                R[i].OnWriteRegister -= WriteRegisterEventHandler;
+            }
+        }
+
+        public void ReadRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            if (_cpu is null) return;
+            CpuFieldID field = (CpuFieldID)e.Register;
+            string label = field.ToString();
+
+
+            e.Value = ReadRegister(field);
+            e.handled = true;
+        }
+
+
+        public void WriteRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            WriteRegister((CpuFieldID)e.Register, (ushort)e.Value);
+            e.handled = true;
+
+        }
+
+
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Cpu != null)
+        {
+            element.SetCpu(Cpu);
+            base.OnParametersSet();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        element.Dispose();
+    }
+
+    /// <summary>
+    /// Called from code to update specific fields
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="val"></param>
+    public void UpdateField(CpuFieldID field, ushort val)
+    {
+        int r = (int)field;
+        string label = field.ToString();
+        element.R[r].UpdateValue(val);
+    }
+
+
+    public void ResetUI()
+    {
+        for (int i = 0; i < element.R.Length; i++)
+        {
+            element.R[i].ClearUpdated();
+        }
+        StateHasChanged();
+    }
+
+
+}

@@ -1,0 +1,334 @@
+@page "/ND110Debugger"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject IAppService appService
+
+<style>
+
+    .border-always {
+        border: 1px solid;
+        white-space: pre-wrap;
+    }
+
+
+    .decorationGlyphMarginClassRed {
+        background: red;
+    }
+
+    .decorationGlyphMarginClass {
+        background: black;
+    }
+
+    .decorationContentClass {
+        background: lightblue;
+    }
+
+    #nd100dbg {
+        height: 300px;
+        width: 600px;
+    }
+
+</style>
+
+<div id="editor"></div>
+
+<PageTitle>ND-110 Opcode Debugger</PageTitle>
+
+<MudExpansionPanels>
+    <MudExpansionPanel Dense=" true" Text="Registers">
+        <MudGrid Class="mt-1">
+            <MudItem xs="4">
+                <MudCard Elevation="25" Class="rounded-lg pb-1">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">ALU RAM</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <NDMicroCpu.Web.Components.RegistersView @ref="_registersView" RegisterLevel="0" RegisterFile="appService.Cpu.hw.alu.ALURAM"></NDMicroCpu.Web.Components.RegistersView>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="4">
+                <MudCard Elevation="25" Class="rounded-lg pb-1">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">ALU internal registers</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <NDMicroCpu.Web.Components.AluInternalRegistersView @ref="_aluView" BufAlu="appService.Cpu.hw.alu"></NDMicroCpu.Web.Components.AluInternalRegistersView>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="4">
+                <MudCard Elevation="25" Class="rounded-lg pb-1">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5" Align="Align.Center">CPU</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <NDMicroCpu.Web.Components.CpuInternalRegistersView @ref="_cpuRegView" Cpu="appService.Cpu"></NDMicroCpu.Web.Components.CpuInternalRegistersView>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+        <br />
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+
+
+<MudContainer Fixed="false" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudGrid Class="mt-0">
+        <MudItem md="12">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Align="Align.Center">ND-110 Opcode Debugger</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudExpansionPanels MultiExpansion="true">
+                        <MudExpansionPanel @bind-Expanded="_isAsmExpanded" Dense="true" Text="Assembly file">
+                            <StandaloneCodeEditor @ref="_editor" Id="nd100dbg" ConstructionOptions="EditorConstructionOptions" OnDidInit="EditorOnDidInit" OnContextMenu="OnContextMenu"></StandaloneCodeEditor>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Dense="true" Text="Log">
+                            <textarea class="border-always" readonly rows="10" cols="100">
+                                @_Log
+                             </textarea>
+                            <br />
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="onClear">Clear log</MudButton>
+                            <br />
+                        </MudExpansionPanel>
+
+                    </MudExpansionPanels>
+                </MudCardContent>
+
+                <MudCardActions Class="m-3">
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled">
+                        <MudButton Class="mr-2 b-3" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowCircleRight" OnClick="onStep">Step</MudButton>
+                        <MudButton Class="mr-2 b-3" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.RunCircle" OnClick="onRun">Run</MudButton>
+                        <MudButton Class="mr-2 b-3" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Replay" OnClick="onReset">Reset</MudButton>
+                    </MudButtonGroup>
+
+                    <MudButtonGroup Class="mr-4" Color="Color.Secondary" Variant="Variant.Filled">
+                        <MudButton Class="mr-2 b-3" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AlarmAdd" OnClick="onBreakpoint">Add Breakpoint</MudButton>
+                    </MudButtonGroup>
+
+                    <MudButtonGroup Class="mr-4" Color="Color.Tertiary" Variant="Variant.Filled">
+                        <MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onSetAddress">Set address</MudButton>
+                        <MudTextField MaxLength="6" @bind-Value="@_memAddress" Variant="Variant.Outlined" HelperText="Memory address" Margin="Margin.Dense" />
+                    </MudButtonGroup>
+                    <br />
+
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<br />
+
+@code {
+    private int currentCount = 0;
+    private bool _isAsmExpanded = true;
+    private int _memAddress;
+    private string _Log { get; set; } = string.Empty;
+    private StandaloneCodeEditor _editor = null!;
+
+    private NDMicroCpu.Web.Components.RegistersView? _registersView;
+    private NDMicroCpu.Web.Components.AluInternalRegistersView? _aluView;
+    private NDMicroCpu.Web.Components.CpuInternalRegistersView? _cpuRegView;
+    //private NDMicroCpu.Web.Components.PicInternalRegistersView? _picView;
+
+    int _currentLine = 1;
+
+
+    /// <summary>
+    /// Clear all "changed markers" in UI fields.
+    /// </summary>
+    void ResetUI()
+    {
+        _registersView?.ResetUI();
+        _aluView?.ResetUI();
+        _cpuRegView?.ResetUI();
+        // _picView?.ResetUI();
+    }
+
+    string asmCode = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (String.IsNullOrEmpty(asmCode))
+        {
+
+            _currentLine = 1;
+            asmCode = await Http.GetStringAsync(@"Assets/NDPROG.TXT");
+
+            await _editor.SetValue(asmCode);
+            await SetLineFocus(_currentLine);
+        }
+    }
+
+
+    private async Task EditorOnDidInit()
+    {
+        await _editor.AddCommand((int)KeyMod.CtrlCmd | (int)KeyCode.KeyH, (args) =>
+       {
+           Console.WriteLine("Ctrl+H : Initial editor command is triggered.");
+       });
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+            new ModelDeltaDecoration
+            {
+                Range = new BlazorMonaco.Range(1,1,1,1),
+                Options = new ModelDecorationOptions
+                {
+                    IsWholeLine = true,
+                    ClassName = "decorationContentClass",
+                    GlyphMarginClassName = "decorationGlyphMarginClass"
+                }
+            }
+        };
+
+        decorationIds = await _editor.DeltaDecorations(null, newDecorations);
+        // You can now use 'decorationIds' to change or remove the decorations
+    }
+
+    private string[]? decorationIds;
+
+    // Set active debugging line in editor
+    public async Task SetLineFocus(int sourceCodeLine)
+    {
+        if (_editor == null) return;
+        if (sourceCodeLine < 0) return;
+
+        // Scroll
+        await _editor.RevealLine(sourceCodeLine);
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+                new ModelDeltaDecoration
+                {
+                    Range = new BlazorMonaco.Range(sourceCodeLine,1,sourceCodeLine,1),
+                    Options = new ModelDecorationOptions
+                    {
+                        IsWholeLine = true,
+                        ClassName = "decorationContentClass",
+                        GlyphMarginClassName = ""
+                    }
+                }
+        };
+
+        decorationIds = await _editor.DeltaDecorations(decorationIds, newDecorations);
+        // You can now use 'decorationIds' to change or remove the decorations
+
+    }
+
+    private string[]? bpdecorationIds;
+
+    public async Task SetLineBreakpoint(int sourceCodeLine)
+    {
+        if (_editor == null) return;
+        //Console.WriteLine($"Stepping to {sourceCodeLine}");
+        if (sourceCodeLine < 0) return;
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+                new ModelDeltaDecoration
+                {
+                    Range = new BlazorMonaco.Range(sourceCodeLine,1,sourceCodeLine,1),
+                    Options = new ModelDecorationOptions
+                    {
+                        IsWholeLine = true,
+                        ClassName = "",
+                        GlyphMarginClassName = "decorationGlyphMarginClassRed"
+                    }
+                }
+        };
+
+        bpdecorationIds = await _editor.DeltaDecorations(null, newDecorations);
+        //bpdecorationIds = await _editor.DeltaDecorations(bpdecorationIds, newDecorations);
+
+        // You can now use 'decorationIds' to change or remove the decorations
+
+    }
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = false,
+                Language = "ND110", //ND110 opcodes
+                GlyphMargin = true,
+                LineNumbers = "on",
+                ReadOnly = false,
+                Value = asmCode
+            };
+    }
+
+    private void OnContextMenu(EditorMouseEvent eventArg)
+    {
+        Console.WriteLine("OnContextMenu : " + System.Text.Json.JsonSerializer.Serialize(eventArg));
+    }
+
+
+    private async Task setFocus(int line) => await SetLineFocus(line);
+
+    void onClear()
+    {
+        _Log = "";
+    }
+
+    async void onReset()
+    {
+        ResetUI();
+        _currentLine = 0;
+        await setFocus(_currentLine);
+
+        _Log = "Reset\r\n";
+
+    }
+    async void onStep()
+    {
+        ResetUI();
+
+        await setFocus(++_currentLine);
+
+        _Log += $"Step {_currentLine}\r\n";
+
+    }
+
+    void onRun()
+    {
+        ResetUI();
+
+        _Log += "Run\r\n";
+
+    }
+
+    async void onBreakpoint()
+    {
+        _Log += "Breakpoint\r\n";
+
+        await SetLineBreakpoint(_currentLine);
+
+    }
+
+    async void onSetAddress()
+    {
+        _currentLine = _memAddress;
+        await setFocus(_currentLine);
+
+        _Log += $"SET {_currentLine}\r\n";
+
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+}

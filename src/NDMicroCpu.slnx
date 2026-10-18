@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="NDMicroCpu.Core/NDMicroCpu.Core.csproj" />
+    <Project Path="NDMicroCpu.Machine/NDMicroCpu.Machine.csproj" />
+    <Project Path="NDMicroCpu.Cli/NDMicroCpu.Cli.csproj" />
+    <Project Path="NDMicroCpu.Web/NDMicroCpu.Web.csproj" />
+    <Project Path="NDMicroCpu.Debugger.Contracts/NDMicroCpu.Debugger.Contracts.csproj" />
+    <Project Path="NDMicroCpu.Debugger/NDMicroCpu.Debugger.csproj" />
+    <Project Path="NDMicroCpu.Debugger.Client/NDMicroCpu.Debugger.Client.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NDMicroCpu.Core.Tests/NDMicroCpu.Core.Tests.csproj" />
+    <Project Path="tests/NDMicroCpu.Cli.Tests/NDMicroCpu.Cli.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,405 @@
+﻿@implements IDisposable
+
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[0].ReadOnly" @bind-Value="@element.R[0].OctalValue" Label="@element.R[0].Label" Variant="Variant.Outlined" title="@element.R[0].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[0].adornment" />
+            <MudTextField ReadOnly="@element.R[1].ReadOnly" @bind-Value="@element.R[1].OctalValue" Label="@element.R[1].Label" Variant="Variant.Outlined" title="@element.R[1].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[1].adornment" />
+            <MudTextField ReadOnly="@element.R[2].ReadOnly" @bind-Value="@element.R[2].OctalValue" Label="@element.R[2].Label" Variant="Variant.Outlined" title="@element.R[2].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[2].adornment" />
+            <MudTextField ReadOnly="@element.R[3].ReadOnly" @bind-Value="@element.R[3].OctalValue" Label="@element.R[3].Label" Variant="Variant.Outlined" title="@element.R[3].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[3].adornment" />
+            <MudTextField ReadOnly="@element.R[4].ReadOnly" @bind-Value="@element.R[4].OctalValue" Label="@element.R[4].Label" Variant="Variant.Outlined" title="@element.R[4].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[4].adornment" />
+            <MudTextField ReadOnly="@element.R[5].ReadOnly" @bind-Value="@element.R[5].OctalValue" Label="@element.R[5].Label" Variant="Variant.Outlined" title="@element.R[5].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[5].adornment" />
+            <MudTextField ReadOnly="@element.R[6].ReadOnly" @bind-Value="@element.R[6].OctalValue" Label="@element.R[6].Label" Variant="Variant.Outlined" title="@element.R[6].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[6].adornment" />
+            <MudTextField ReadOnly="@element.R[7].ReadOnly" @bind-Value="@element.R[7].OctalValue" Label="@element.R[7].Label" Variant="Variant.Outlined" title="@element.R[7].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[7].adornment" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudTextField ReadOnly="@element.R[8].ReadOnly" @bind-Value="@element.R[8].OctalValue" Label="@element.R[8].Label" Variant="Variant.Outlined" title="@element.R[8].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[8].adornment" />
+            <MudTextField ReadOnly="@element.R[9].ReadOnly" @bind-Value="@element.R[9].OctalValue" Label="@element.R[9].Label" Variant="Variant.Outlined" title="@element.R[9].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[9].adornment" />
+            <MudTextField ReadOnly="@element.R[10].ReadOnly" @bind-Value="@element.R[10].OctalValue" Label="@element.R[10].Label" Variant="Variant.Outlined" title="@element.R[10].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[10].adornment" />
+            <MudTextField ReadOnly="@element.R[11].ReadOnly" @bind-Value="@element.R[11].OctalValue" Label="@element.R[11].Label" Variant="Variant.Outlined" title="@element.R[11].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[11].adornment" />
+            <MudTextField ReadOnly="@element.R[12].ReadOnly" @bind-Value="@element.R[12].OctalValue" Label="@element.R[12].Label" Variant="Variant.Outlined" title="@element.R[12].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[12].adornment" />
+            <MudTextField ReadOnly="@element.R[13].ReadOnly" @bind-Value="@element.R[13].OctalValue" Label="@element.R[13].Label" Variant="Variant.Outlined" title="@element.R[13].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[13].adornment" />
+            <MudTextField ReadOnly="@element.R[14].ReadOnly" @bind-Value="@element.R[14].OctalValue" Label="@element.R[14].Label" Variant="Variant.Outlined" title="@element.R[14].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[14].adornment" />
+            <MudTextField ReadOnly="@element.R[15].ReadOnly" @bind-Value="@element.R[15].OctalValue" Label="@element.R[15].Label" Variant="Variant.Outlined" title="@element.R[15].Description" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentText="@element.R[15].adornment" />
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+
+@code {
+
+    [Parameter]
+    public BUFALU? BufAlu { get; set; }
+
+    public enum AluFieldID
+    {
+        GPR,
+        A,
+        B,
+        D,
+        CarryIn,
+        CarryOut,
+        Q,
+        F,
+
+        // ---
+        Y,
+        R,
+        S,
+        ShiftMode,
+        RLI,
+        QLI,
+        RRI,
+        QRI,
+        MAX
+    }
+
+    public AluRegs element = new AluRegs();
+
+    public class AluRegs : IDisposable
+    {
+        BUFALU? _BufAlu { get; set; }
+
+        public Register[] R;
+
+        public AluRegs()
+        {
+            //int max = (int)AluFieldID.MAX+1;
+            int max = 16;
+            R = new Register[max];
+            for (ushort i = 0; i < max; i++)
+            {
+                AluFieldID field = (AluFieldID)i;
+                string label = field.ToString();
+                R[i] = new Register(i, label);
+
+                R[i].SetDescription(ReadRegisterDescription(field));
+                R[i].ReadOnly = IsReadOnly(field);
+
+                R[i].UpdateValue(ReadRegister(field), false);
+
+                R[i].OnReadRegister += ReadRegisterEventHandler;
+                R[i].OnWriteRegister += WriteRegisterEventHandler;
+            }
+        }
+
+        internal void SetBufAlu(BUFALU bufalu)
+        {
+            _BufAlu = bufalu;
+
+        }
+
+        string ReadRegisterDescription(AluFieldID id)
+        {
+            string val = "";
+            switch (id)
+            {
+                case AluFieldID.GPR:
+                    val = "GPR is a General Purpose register used by microprogram for various purposes";
+                    break;
+
+                case AluFieldID.A:
+                    val = "ALU Operand A";
+                    break;
+
+                case AluFieldID.B:
+                    val = "ALU Operand B";
+                    break;
+                case AluFieldID.Q:
+                    val = "ALU Holding register";
+                    break;
+                case AluFieldID.F:
+                    val = "ALU Result";
+                    break;
+                case AluFieldID.Y:
+                    val = "ALU Output (IDB Bus)";
+                    break;
+                case AluFieldID.R:
+                    val = "ALU R register";
+                    break;
+                case AluFieldID.S:
+                    val = "ALU S register";
+                    break;
+                case AluFieldID.D:
+                    val = "ALU Internal Data Bus";
+                    break;
+
+                case AluFieldID.ShiftMode:
+                    val = "Shift mode:  0=ARITHM, 1=ROT, 2=ZIN, 3=LIN, 4=NONE";
+                    break;
+
+                case AluFieldID.RLI:
+                    val = "BIT 15 of RAM (F)";
+                    break;
+
+                case AluFieldID.QLI:
+                    val = "BIT 15 of Q";
+                    break;
+
+                case AluFieldID.RRI:
+                    val = "BIT 0 of RAM (F)";
+                    break;
+
+                case AluFieldID.QRI:
+                    val = "BIT 0 of Q";
+                    break;
+
+                case AluFieldID.CarryIn:
+                    val = "ALU Carry IN";
+                    break;
+
+                case AluFieldID.CarryOut:
+                    val = "ALU Carry OUT";
+                    break;
+
+                default:
+                    val = "";
+                    break;
+
+            }
+
+            return val;
+        }
+
+
+        ushort ReadRegister(AluFieldID id)
+        {
+            if (_BufAlu is null) return 0;
+            int val = 0;
+
+            switch (id)
+            {
+                case AluFieldID.GPR:
+                    val = _BufAlu.GPR;
+                    break;
+
+                case AluFieldID.A:
+                    val = _BufAlu.A_Operand;
+                    break;
+
+                case AluFieldID.B:
+                    val = _BufAlu.B_Operand;
+                    break;
+                case AluFieldID.Q:
+                    val = _BufAlu.Q;
+                    break;
+                case AluFieldID.F:
+                    val = _BufAlu.F;
+                    break;
+                case AluFieldID.Y:
+                    val = _BufAlu.Y;
+                    break;
+                case AluFieldID.R:
+                    val = _BufAlu.R;
+                    break;
+                case AluFieldID.S:
+                    val = _BufAlu.S;
+                    break;
+                case AluFieldID.D:
+                    val = _BufAlu.DataBus;
+                    break;
+
+                case AluFieldID.ShiftMode:
+                    val = (ushort)_BufAlu.ShiftMode;
+                    break;
+
+                case AluFieldID.RLI:
+                    val = _BufAlu.RLI;
+                    break;
+
+                case AluFieldID.QLI:
+                    val = _BufAlu.QLI;
+                    break;
+
+                case AluFieldID.RRI:
+                    val = _BufAlu.RRI;
+                    break;
+
+                case AluFieldID.QRI:
+                    val = _BufAlu.QRI;
+                    break;
+
+                case AluFieldID.CarryIn:
+                    val = _BufAlu.CARRY_IN ? 1 : 0;
+                    break;
+
+                case AluFieldID.CarryOut:
+                    val = _BufAlu.CARRY_OUT ? 1 : 0;
+                    break;
+
+                default:
+                    val = 0;
+                    break;
+
+            }
+            return (ushort)val;
+        }
+
+        bool IsReadOnly(AluFieldID id)
+        {
+            switch (id)
+            {
+                // Fields that are readonly
+                case AluFieldID.Y:
+                case AluFieldID.D:
+                case AluFieldID.ShiftMode:
+                case AluFieldID.CarryOut:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        void WriteRegister(AluFieldID id, ushort val)
+        {
+            if (_BufAlu is null) return;
+
+
+            switch (id)
+            {
+                case AluFieldID.GPR:
+                    _BufAlu.GPR = val;
+                    break;
+
+                case AluFieldID.A:
+                    _BufAlu.A_Operand = val;
+                    break;
+
+                case AluFieldID.B:
+                    _BufAlu.B_Operand = val;
+                    break;
+                case AluFieldID.Q:
+                    _BufAlu.Q = val;
+                    break;
+                case AluFieldID.F:
+                    _BufAlu.F = val;
+                    break;
+                case AluFieldID.Y:
+                    //_BufAlu.Y = val;
+                    break;
+                case AluFieldID.R:
+                    _BufAlu.R = val;
+                    break;
+                case AluFieldID.S:
+                    _BufAlu.S = val;
+                    break;
+                case AluFieldID.D:
+                    //_BufAlu.DataBus = val;
+                    break;
+
+                case AluFieldID.ShiftMode:
+                    //_BufAlu.ShiftMode = val;
+                    break;
+
+                case AluFieldID.RLI:
+                    _BufAlu.RLI = val;
+                    break;
+
+                case AluFieldID.QLI:
+                    // QLI is now an OUTPUT (Q>>15), read-only since the QSEL model.
+                    // The writable Q serial input is QLeftSerialInput (the value
+                    // clocked into Q bit 0 on a double shift left).
+                    _BufAlu.QLeftSerialInput = val;
+                    break;
+
+                case AluFieldID.RRI:
+                    _BufAlu.RRI = val;
+                    break;
+
+                case AluFieldID.QRI:
+                    // QRI is now an OUTPUT (Q&1), read-only since the QSEL model - the
+                    // Q bit-15 double-shift-right input is hardwired to F[0] in the
+                    // mux, so there is nothing external to poke here.
+                    //_BufAlu.QRI = val;
+                    break;
+
+                case AluFieldID.CarryIn:
+                    _BufAlu.CARRY_IN = (val != 0);
+                    break;
+
+                case AluFieldID.CarryOut:
+                    //_BufAlu.CARRY_OUT = (val != 0);
+                    break;
+
+                default:
+                    val = 0;
+                    break;
+
+            }
+
+        }
+
+
+        public void Dispose()
+        {
+            int max = 16;
+            for (int i = 0; i < max; i++)
+            {
+                R[i].OnReadRegister -= ReadRegisterEventHandler;
+                R[i].OnWriteRegister -= WriteRegisterEventHandler;
+            }
+        }
+
+        public void ReadRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            if (_BufAlu is null) return;
+            AluFieldID field = (AluFieldID)e.Register;
+            string label = field.ToString();
+
+            e.Value = ReadRegister(field);
+            e.handled = true;
+        }
+
+
+        public void WriteRegisterEventHandler(object? sender, UpdateRegisterEvent e)
+        {
+            WriteRegister((AluFieldID)e.Register, (ushort)e.Value);
+            e.handled = true;
+        }
+
+
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (BufAlu != null)
+        {
+            element.SetBufAlu(BufAlu);
+            base.OnParametersSet();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        element.Dispose();        
+    }
+
+    /// <summary>
+    /// Called from code to update specific fields
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="val"></param>
+    public void UpdateField(AluFieldID field, ushort val)
+    {
+        int r = (int)field;
+        string label = field.ToString();
+        element.R[r].UpdateValue(val);
+    }
+
+
+    private void Reset()
+    {
+        element = new AluRegs();
+        StateHasChanged();
+    }
+
+    public void ResetUI()
+    {
+        for (int i = 0; i < element.R.Length; i++)
+        {
+            element.R[i].ClearUpdated();
+        }
+        StateHasChanged();
+    }
+}

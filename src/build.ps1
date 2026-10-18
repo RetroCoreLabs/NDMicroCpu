@@ -1,0 +1,177 @@
+<#
+.SYNOPSIS
+  Builds, tests and publishes every executable in this repo as a SINGLE self-contained file.
+
+.DESCRIPTION
+  One .exe per app, with no .dll beside it and no .NET install needed on the target machine.
+  That costs size - each exe carries its own runtime - and it is the point: these are handed to
+  people who should not have to install anything.
+
+  How the "no DLLs" part is actually achieved, because each switch matters:
+
+    PublishSingleFile                    packs the managed assemblies into the exe
+    IncludeNativeLibrariesForSelfExtract native libraries too (none here today; kept so a future native dependency is bundled;
+                                         without this they land beside the exe as loose .dll files)
+    SatelliteResourceLanguages=en        stops localised resource assemblies creating one
+                                         subdirectory per language, each holding a .dll
+    DebugType=none                       no .pdb beside the exe
+    EnableCompressionInSingleFile        compresses the bundle; roughly halves the size
+
+  NOT used, deliberately: PublishTrimmed. The token tables are built by reflection-free code, but
+  trimming has not been tested against the assemblers; do not add it without running every
+  round-trip test on the published exe.
+
+.PARAMETER Configuration
+  Release (default) or Debug.
+
+.PARAMETER Runtime
+  RID to publish for. Default win-x64. linux-x64 and osx-arm64 also work for the console apps.
+
+.PARAMETER Output
+  Where the exes go. Default: publish\<Runtime> in the repo root.
+
+.PARAMETER FrameworkDependent
+  Publish small exes that need a matching .NET runtime installed, instead of self-contained ones.
+
+.PARAMETER SkipTests
+  Do not run the test suites first. The default is to run them and stop on failure - publishing
+  binaries nobody tested is how a bad build reaches a machine.
+
+.PARAMETER Clean
+  Delete the output directory first.
+
+.EXAMPLE
+  .\build.ps1
+  .\build.ps1 -Configuration Debug -SkipTests
+  .\build.ps1 -Runtime linux-x64 -Output E:\drop
+#>
+param(
+    [ValidateSet('Release', 'Debug')]
+    [string]$Configuration = 'Release',
+    [string]$Runtime = 'win-x64',
+    [string]$Output = '',
+    [switch]$FrameworkDependent,
+    [switch]$SkipTests,
+    [switch]$Clean
+)
+
+$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+if (-not $Output) { $Output = Join-Path $root (Join-Path 'publish' $Runtime) }
+
+# nodeReuse:false on every call. Node reuse is ON by default and leaves MSBuild worker processes
+# behind; each one holds a DLL open, so the NEXT build silently keeps the old binary and the tests
+# then pass against stale code.
+$common = @('-nodeReuse:false')
+
+# The solution is named explicitly so the script works from any current directory, not only from src.
+$sln = Join-Path $root 'NDMicroCpu.slnx'
+
+function Write-Head($text) {
+    Write-Host ''
+    Write-Host ('=' * 78) -ForegroundColor DarkGray
+    Write-Host "  $text" -ForegroundColor Cyan
+    Write-Host ('=' * 78) -ForegroundColor DarkGray
+}
+
+# ---------------------------------------------------------------- what to publish
+
+# Every project that produces an executable, found by reading the csproj rather than by keeping a
+# list here that would rot the next time a project is added. Test projects are excluded: they are
+# OutputType Exe under the modern SDK but they are not apps.
+function Get-ExecutableProjects {
+    $found = @()
+    foreach ($proj in Get-ChildItem $root -Recurse -Filter *.csproj -File) {
+        if ($proj.FullName -match '\\(obj|bin)\\') { continue }
+        $text = Get-Content $proj.FullName -Raw
+        if ($text -notmatch '<OutputType>\s*(Win)?Exe\s*</OutputType>') { continue }
+        if ($text -match '<IsTestProject>\s*true\s*</IsTestProject>') { continue }
+        if ($proj.FullName -match '\\tests\\' -or $proj.BaseName -match '\.Tests$') { continue }
+
+        $name = if ($text -match '<AssemblyName>\s*([^<]+?)\s*</AssemblyName>') { $Matches[1] } else { $proj.BaseName }
+        $found += [pscustomobject]@{ Name = $name; Path = $proj.FullName }
+    }
+    return $found | Sort-Object Name
+}
+
+$projects = Get-ExecutableProjects
+if (-not $projects) { throw "no executable projects found under $root" }
+
+Write-Head "$(Split-Path -Leaf $root) - $($projects.Count) executable(s), $Configuration, $Runtime"
+$projects | ForEach-Object { Write-Host ("  {0,-18} {1}" -f $_.Name, $_.Path.Substring($root.Length + 1)) }
+
+if ($Clean -and (Test-Path $Output)) {
+    Write-Host "cleaning $Output"
+    Remove-Item $Output -Recurse -Force
+}
+
+# ---------------------------------------------------------------- build and test
+
+Write-Head 'Restore and build'
+dotnet build $sln -c $Configuration @common
+if ($LASTEXITCODE -ne 0) { throw 'build failed' }
+
+if (-not $SkipTests) {
+    Write-Head 'Test'
+    # The same run CI does. Tests that need the original ND-500/ND-5000 dumps skip themselves when
+    # ND500UC_MC_DIR / ND5000UC_MC_DIR are unset (see the test files).
+    dotnet test $sln -c $Configuration --no-build @common
+    if ($LASTEXITCODE -ne 0) { throw 'tests failed - nothing published. Re-run with -SkipTests only if you know why.' }
+}
+
+# ---------------------------------------------------------------- publish
+
+$selfContained = -not $FrameworkDependent
+
+$publishArgs = @(
+    '-c', $Configuration
+    '-r', $Runtime
+    '--self-contained', $selfContained.ToString().ToLowerInvariant()
+    '-p:PublishSingleFile=true'
+    '-p:IncludeNativeLibrariesForSelfExtract=true'
+    '-p:SatelliteResourceLanguages=en'
+    '-p:DebugType=none'
+    '-p:GenerateDocumentationFile=false'
+)
+
+# Compression is REJECTED outright on a framework-dependent publish - NETSDK1176, "compression in a
+# single file bundle is only supported when publishing a self-contained application" - so it is
+# added only for the self-contained case rather than always.
+if ($selfContained) { $publishArgs += '-p:EnableCompressionInSingleFile=true' }
+
+New-Item -ItemType Directory -Force $Output | Out-Null
+
+foreach ($p in $projects) {
+    Write-Head "Publish $($p.Name)"
+    dotnet publish $p.Path @publishArgs -o $Output @common
+    if ($LASTEXITCODE -ne 0) { throw "publish failed: $($p.Name)" }
+}
+
+# ---------------------------------------------------------------- report
+
+Write-Head 'Published'
+
+$exes = Get-ChildItem $Output -Filter *.exe -File | Sort-Object Name
+if (-not $exes) { $exes = Get-ChildItem $Output -File | Where-Object { -not $_.Extension } | Sort-Object Name }
+
+$exes | ForEach-Object {
+    Write-Host ("  {0,-22} {1,8:N1} MB" -f $_.Name, ($_.Length / 1MB))
+}
+
+# Loose DLLs beside the exes mean the single-file switches did not do their job. Say so loudly
+# rather than let someone copy one exe to another machine and find out there.
+$loose = Get-ChildItem $Output -Recurse -File | Where-Object { $_.Extension -in '.dll', '.pdb' }
+Write-Host ''
+if ($loose) {
+    Write-Host "  WARNING: $($loose.Count) loose .dll/.pdb file(s) in the output:" -ForegroundColor Yellow
+    $loose | Select-Object -First 15 | ForEach-Object {
+        Write-Host ("    " + $_.FullName.Substring($Output.Length + 1)) -ForegroundColor Yellow
+    }
+    Write-Host '  These are NOT bundled. The exes are not standalone.' -ForegroundColor Yellow
+} else {
+    Write-Host '  No loose .dll or .pdb - every exe is standalone.' -ForegroundColor Green
+}
+
+Write-Host ''
+Write-Host "  Output: $Output"
+Write-Host ''

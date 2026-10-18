@@ -1,0 +1,251 @@
+@page "/Terminal"
+@inject IJSRuntime JSRuntime
+@inject IAppService appService
+@implements IDisposable
+
+
+@if (!appService.IsInitialized)
+{
+    <MudAlert Severity="Severity.Error">Initializtion via INDEX page not executed. Terminal cannot continue</MudAlert>
+}
+
+<style>
+    .text-area-printer-font {
+        border: 2px solid #333;
+        background-color: #222;
+        color: #bbb;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 14px;
+        line-height: 16px;
+        padding: 8px;
+    }
+
+</style>
+
+<PageTitle>Terminal</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Terminal</MudText>
+
+
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="16">
+            <textarea readonly class="text-area-printer-font" rows="25" cols="80" @bind="appService.ConsoleText"></textarea>
+
+            <MudPaper Elevation="2" class="pa-4">
+                @if (appService.IsInitialized)
+                {
+                    <br />
+                    <MudButtonGroup>
+
+                        <MudSwitch @bind-Value="@Power" onchange="machinePowerChanged" ThumbIcon="@(_machineON==true ? Icons.Material.Filled.Done : Icons.Material.Filled.Close)" ThumbIconColor="@(_machineON==true ? Color.Success : Color.Error)">Machine power</MudSwitch>
+                        @if (_machineON)
+                        {
+                            <MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onReset">Reset CPU</MudButton>
+                        }
+                    </MudButtonGroup>
+                    @if (_machineON)
+                    {
+                        <MudText Class="ml-2 mt-2" Typo="Typo.caption">CPU speed: @FormatRate(appService.CpuTicksPerSecond) (a long test like BFILL/MOVB runs millions of silent cycles - it is working, not hung)</MudText>
+                    }
+                }
+            </MudPaper>
+
+        </MudItem>
+
+        <MudPaper Elevation="2" style="width: 250px; height: 400px;" class="pa-4">
+            @if (_machineON)
+            {
+                <MudGrid style="padding: 10px;">
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">MACL</MudText>
+                            @if (!MasterClearEnabled)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Brightness1" style="color:rgb(255,0,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.PanoramaFishEye" style="color:rgb(123,255,255)" />
+                            }
+                        </div>
+                    </MudItem>
+
+                    <br />
+
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Initialized</MudText>
+                            @if (!InitializationCompleted)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Brightness1" style="color:rgb(0,255,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.PanoramaFishEye" style="color:rgb(123,255,255)" />
+                            }
+                        </div>
+                    </MudItem>
+
+                    <br />
+
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Opcom</MudText>
+                            @if (!OpComEnabled)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Brightness1" style="color:rgb(255,100,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.PanoramaFishEye" style="color:rgb(123,255,255)" />
+                            }
+                        </div>
+                    </MudItem>
+
+                    <br />
+
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Running</MudText>
+                            @if (appService.Cpu.hw.cpu_regs.STOP)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.DoNotDisturbOn" style="color:rgb(255,0,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Loop" style="color:rgb(0,255,0)" />
+                            }
+                        </div>
+                    </MudItem>
+
+                    <br />
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Int 10 (tx)</MudText>
+                            @if (Int10Enabled)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Alarm" style="color:rgb(0,255,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.AlarmOff" style="color:rgb(0,0,0)" />
+                            }
+                        </div>
+                    </MudItem>
+                    <br />
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Int 12 (rx)</MudText>
+                            @if (Int12Enabled)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Alarm" style="color:rgb(0,255,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.AlarmOff" style="color:rgb(0,0,0)" />
+                            }
+                        </div>
+                    </MudItem>
+                    <br />
+                    <MudItem class="ml-4 mt-4">
+                        <div style="display: flex; align-items: center;">
+                            <MudText style="width: 100px;">Int 13 (Clock)</MudText>
+                            @if (Int13Enabled)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Alarm" style="color:rgb(0,255,0)" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.AlarmOff" style="color:rgb(0,0,0)" />
+                            }
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            }
+        </MudPaper>
+    </MudGrid>
+
+    <br />    
+    <NDMicroCpu.Web.Components.OpComInfo></NDMicroCpu.Web.Components.OpComInfo>
+</MudContainer>
+
+
+
+
+@code {
+
+    private DotNetObjectReference<Terminal>? objectReference;
+
+    protected override void OnInitialized()
+    {
+        // Observe the global machine ticker (now owned by the AppService) so this page refreshes
+        // its console + status LEDs while the CPU runs, no matter who powered it on.
+        appService.OnMachineBatch += OnMachineBatch;
+    }
+
+    private void OnMachineBatch()
+    {
+        // The ticker fires on a timer thread; marshal the UI refresh onto the render context.
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objectReference = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("addKeyListener", objectReference);
+        }
+
+    }
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("removeKeyListener", objectReference);
+        objectReference?.Dispose();
+
+        appService.OnMachineBatch -= OnMachineBatch;
+    }
+
+
+    // Machine power now lives in the AppService (global). This page just drives it.
+    public bool Power
+    {
+        get => appService.PowerOn;
+        set { appService.SetPower(value); StateHasChanged(); }
+    }
+
+    bool _machineON => appService.PowerOn;
+
+    void onReset()
+    {
+        appService.ResetMachine();
+    }
+
+    // Human-readable CPU throughput (micro-cycles/sec).
+    static string FormatRate(long hz)
+    {
+        if (hz <= 0) return "starting…";
+        if (hz >= 1_000_000) return (hz / 1_000_000.0).ToString("0.0") + " MHz";
+        if (hz >= 1_000) return (hz / 1_000.0).ToString("0") + " kHz";
+        return hz + " Hz";
+    }
+
+
+    [JSInvokableAttribute("OnKeyDown")]
+    public void OnKeyDown(string key)
+    {
+        // handle the key event here
+        //Console.WriteLine("Key pressed: " + key);
+        HandleKey(key, true);
+    }
+    [JSInvokableAttribute("OnKeyUp")]
+    public void OnKeyUp(string key)
+    {
+        // handle the key up event here
+        //Console.WriteLine("Key released: " + key);
+        HandleKey(key, false);
+    }
+
+
+}

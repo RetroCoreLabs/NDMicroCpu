@@ -1,0 +1,182 @@
+﻿<style>
+
+    .grid td {
+        width: 70px;
+        height: 50px;
+        border: 2px double #000000;
+        background-color: #DEAE5F;
+        text-align: center;
+        font-size: 14px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: bold;
+        color: #000000;
+    }
+
+
+    .grid th {
+        font-weight: bold;
+        border: 2px solid #000000;
+        background-color: #87CEEB;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .buttons {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        .buttons button {
+            width: 80px;
+            padding: 10px;
+            margin: 0 10px;
+        }
+</style>
+
+<MudContainer md="12" ml="20" Fixed="false" MaxWidth="MaxWidth.Large">
+    <MudPaper Elevation="25" Class="rounded-lg p-4">
+
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>Address</th>
+                    @for (int i = 0; i < rows_X; i++)
+                    {
+                        <th>@Int2Oct(i)</th>
+                    }
+                    <th>Ascii</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (memory != null)
+                {
+                    @for (int i = startOffset; i < startOffset + (rows_X * 10) && i < memory.Length; i += rows_X)
+                    {
+                        <tr>
+                            <th>@Int2Oct(i)</th>
+                            @for (int j = i; j < i + rows_X && j < memory.Length; j++)
+                            {
+                                <td title="Address: @Int2Oct(j)">@Int2Oct(memory[j])</td>
+                            }
+                            <td>
+                                @{
+                                    string asciiString = "";
+                                    for (int j = i; j < i + rows_X && j < memory.Length; j++)
+                                    {
+                                        byte b1 = (byte)((memory[j] >> 8) & 0x00FF);
+                                        byte b2 = (byte)((memory[j] & 0x00FF));
+
+
+                                        if ((b1 >= 32) && (b1 <= 126))
+                                        {
+                                            asciiString += (char)b1; ;
+                                        }
+                                        else
+                                        {
+                                            asciiString += '.';
+                                        }
+
+                                        if ((b2 >= 32) && (b2 <= 126))
+                                        {
+                                            asciiString += (char)b2;
+                                        }
+                                        else
+                                        {
+                                            asciiString += '.';
+                                        }
+                                    }
+                                }
+                                @asciiString
+                            </td>
+
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <br />
+    </MudPaper>
+</MudContainer>
+
+<br />
+
+<MudContainer md="6" Fixed="false" MaxWidth="MaxWidth.Small">
+
+    <br />
+    <MudButtonGroup Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary">
+        <MudButton Class="m-3" Variant="Variant.Filled" OnClick="MoveUp" EndIcon="@Icons.Material.Filled.ArrowCircleUp">Up</MudButton>
+        <MudButton Class="m-3" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="MoveDown" EndIcon="@Icons.Material.Filled.ArrowCircleDown">Down</MudButton>
+        <MudTextField Class="m-3" MaxLength="6" @bind-Value="@startOffset" Variant="Variant.Outlined" HelperText="Start of memory in grid" Margin="Margin.Dense" Style="display:inline-block; " />
+    </MudButtonGroup>
+
+    <br />
+</MudContainer>
+
+
+
+@code {
+    [Parameter]
+    public ushort[]? memory { get; set; }
+
+    private int startOffset = 0;
+    int deltaOffset;
+    int rows_X = 10;
+    int rows_Y = 10;
+
+    protected override void OnInitialized()
+    {
+        deltaOffset = rows_X * rows_Y;
+    }
+
+    private void MoveUp()
+    {
+        startOffset = Math.Max(startOffset - deltaOffset, 0);
+    }
+
+    private void MoveDown()
+    {
+        if (memory != null)
+        {
+            startOffset = Math.Min(startOffset + deltaOffset, memory.Length - deltaOffset);
+        }
+    }
+
+    private void UpdateStartOffset(int offset)
+    {
+        if (memory != null)
+        {
+            startOffset = Math.Min(Math.Max(startOffset + offset, 0), memory.Length - deltaOffset);
+        }
+    }
+
+
+    private string Int2Oct(int val)
+    {
+        return Convert.ToString(val, 8).PadLeft(6, '0');
+    }
+
+    /* Color codes representing the 1970's
+     Olive Green: #808000
+    Rust Orange: #8B2500
+    Burnt Sienna: #E97451  <== Looks like the HD
+    Mustard Yellow: #FFDB58
+    Sky Blue: #87CEEB <= Nice blue color
+    Tan: #D2B48C
+    Deep Orange: #FF8C00
+
+
+    TVD KeyBoard top #D4A24C
+    TVD KeyBoard button #DEAE5F <== nice!
+
+    Nice gray : adb5bd
+    */
+
+
+    // List octal values of memory
+    // List dissasmbled values
+    // Add support for updating memory - Octal values and maybe asm of ND-110 opcodes ?
+
+}
+
+
+

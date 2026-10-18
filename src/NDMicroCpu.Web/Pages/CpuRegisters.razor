@@ -1,0 +1,49 @@
+@page "/CpuRegisters"
+@inject IAppService appService
+
+<MudText Typo="Typo.h3" GutterBottom="true">RegisterFile and ALU RAM Registers</MudText>
+
+<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Expanded="true" Dense="true" Text="Register File">
+        <NDMicroCpu.Web.Components.RegisterFileView RegisterFile="appService.Cpu.hw.RF"></NDMicroCpu.Web.Components.RegisterFileView>
+        <br />
+    </MudExpansionPanel>
+
+    <MudExpansionPanel Expanded="true"  Dense="true" Text="ALU RAM">
+        <NDMicroCpu.Web.Components.RegistersView RegisterLevel="0" RegisterFile="appService.Cpu.hw.alu.ALURAM"></NDMicroCpu.Web.Components.RegistersView>
+        <br />
+    </MudExpansionPanel>
+
+
+    <MudExpansionPanel  Dense="true" Text="ALU Internal Registers">        
+        <NDMicroCpu.Web.Components.AluInternalRegistersView BufAlu="appService.Cpu.hw.alu"></NDMicroCpu.Web.Components.AluInternalRegistersView>
+        <br />
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+<br />
+
+<MudButton Class="mr-2" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="onAluCHange">ALU change</MudButton>
+
+@code {
+
+
+    void onAluCHange()
+    {
+        var BufAlu = appService.Cpu.hw.alu;
+        if (BufAlu != null)
+        {
+            BufAlu.ALURAM.UIWrite(0, 0, 1);
+
+            ushort i = BufAlu.ALURAM.UIRead(0, 1);
+            i++;
+            BufAlu.ALURAM.UIWrite(0, 1, i);
+
+
+            ushort r1 = appService.Cpu.hw.RF.UIRead(0, 1);
+            r1++;
+            appService.Cpu.hw.RF.UIWrite(0, 1,r1);
+        }
+    }
+}
+

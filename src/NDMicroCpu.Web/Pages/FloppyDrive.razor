@@ -1,0 +1,229 @@
+@page "/FloppyDrive"
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
+@inject NDMicroCpu.Web.Services.IAppService appService
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+
+        .selected > td {
+            color: white !important;
+        }
+
+            .selected > td .mud-input {
+                color: white !important;
+            }
+</style
+
+
+<PageTitle>Floppy Drive</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Floppy drive</MudText>
+ 
+
+<MudCard Elevation="25" Class="rounded mt-8" Style="background-color: rgba(255, 255, 255, 0.85);">
+
+
+
+<MudTable Elevation="25" Class="pa-4" Items="@Floppies" Hover="true" Breakpoint="Breakpoint.Sm" @ref="mudTableRef" RowClassFunc="@SelectedRowClassFunc" OnRowClick="RowClickEvent" T="Floppy">
+    <HeaderContent>
+        <th>Name</th>
+        <th>Description</th>
+    </HeaderContent>
+    <RowTemplate>
+        <td>@context.Name</td>
+        <td>@context.Description</td>
+    </RowTemplate>
+</MudTable>
+
+<MudCard Elevation="25" Class="rounded pa-4">
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Success" OnClick="onPowerOnAndBootSelected">Power on &amp; boot selected</MudButton>
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Secondary" OnClick="onInsertSelected">Insert only (device 1560)</MudButton>
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Error" OnClick="onEject">Eject floppy</MudButton>
+    <br />
+    <br />
+    <MudText Typo="Typo.body2">
+        <b>Power on &amp; boot</b> does it all: powers the machine on, waits for OPCOM, and types
+        <b>1560$</b> for you - open the <b>Terminal</b> page to watch it run.
+        <b>Insert only</b> just mounts the disk; then boot it yourself from the Terminal (power on,
+        wait for the <b>#</b> prompt, type <b>1560$</b>).
+    </MudText>
+    <MudText Typo="Typo.h5" GutterBottom="true">Loaded floppy: @loadedFloppy</MudText>
+</MudCard>
+
+<MudCard Elevation="25" Class="rounded pa-4 mt-4">
+    <MudText Typo="Typo.h5" GutterBottom="true">Upload your own image (.BPUN)</MudText>
+    <MudText Typo="Typo.body2" GutterBottom="true">
+        Pick a .BPUN file, then Insert it as a floppy (device 1560) or as the paper-tape reader
+        (device 400). Nothing boots yet - go to the <b>Terminal</b> page, let the machine power on,
+        and type <b>1560$</b> (floppy) or <b>400$</b> (paper tape) to load and run it.
+        (Raw floppy .img/DMA images are not supported by this binary-loader path.)
+    </MudText>
+
+    <InputFile OnChange="OnFileSelected" accept=".bpun,.BPUN,.bin" />
+    <br />
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Success" Disabled="@(uploadedBytes is null)" OnClick="@(() => onPowerOnAndBootUpload(0x370))">Power on &amp; boot as floppy (1560)</MudButton>
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Success" Disabled="@(uploadedBytes is null)" OnClick="@(() => onPowerOnAndBootUpload(0x100))">Power on &amp; boot as paper tape (400)</MudButton>
+    <br />
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(uploadedBytes is null)" OnClick="@(() => onAttach(0x370))">Insert only as floppy (1560)</MudButton>
+    <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(uploadedBytes is null)" OnClick="@(() => onAttach(0x100))">Insert only as paper tape (400)</MudButton>
+    <br />
+    <br />
+    <MudText Typo="Typo.body1">@uploadStatus</MudText>
+</MudCard>
+
+</MudCard>
+<div style="background-image: url('/Assets/floppy.png'); background-size: cover; background-repeat: no-repeat; height:400px ">
+</div>
+
+
+@code {
+
+    private class Floppy
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        // wwwroot/Assets file streamed over the bus when this floppy is booted (null = not bootable yet).
+        public string? Asset { get; set; }
+    }
+
+
+    private string? loadedFloppy="";
+    private string? selectedFloppy="";
+    private MudTable<Floppy>? mudTableRef;
+    private int selectedRowNumber = -1;
+    private List<string> clickedEvents = new();
+
+    private Floppy? selectedFloppyItem;
+
+    private IEnumerable<Floppy> Floppies = new List<Floppy>()
+    {
+        new Floppy { Name = "210523E00-XX-01D", Description = "Test programs (INSTRUCTION-B)", Asset = "INSTRUCTION-B.BPUN" },
+        new Floppy { Name = "N-10-102-I", Description = "Sintran H Boot" },
+        new Floppy { Name = "N-10-102-II", Description = "Sintran H Data" },
+    };
+
+
+    private void RowClickEvent(TableRowClickEventArgs<Floppy> tableRowClickEventArgs)
+    {
+        clickedEvents.Add("Row has been clicked");
+    }
+
+    private string SelectedRowClassFunc(Floppy floppy, int rowNumber)
+    {
+        if (mudTableRef is null) return string.Empty;
+
+        if (selectedRowNumber == rowNumber)
+        {
+            selectedRowNumber = -1;
+            clickedEvents.Add("Selected Row: None");
+            return string.Empty;
+        }
+        else if (mudTableRef.SelectedItem != null && mudTableRef.SelectedItem.Equals(floppy))
+        {
+            selectedRowNumber = rowNumber;
+            selectedFloppy = floppy.Name;
+            selectedFloppyItem = floppy;
+            clickedEvents.Add($"Selected Row: {rowNumber}");
+            return "selected";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    async Task onPowerOnAndBootSelected()
+    {
+        // One click: fetch the selected shipped floppy, power on, wait for OPCOM, auto-type 1560$.
+        Floppy? f = selectedFloppyItem;
+        string? asset = f?.Asset;
+        if (string.IsNullOrEmpty(asset))
+        {
+            loadedFloppy = f?.Name is null ? "Select a floppy first" : $"{f.Name}: no image available";
+            return;
+        }
+        loadedFloppy = "Powering on & booting...";
+        bool ok = await appService.PowerOnAndBootAssetAsync(asset, 0x370);
+        loadedFloppy = ok
+            ? $"Booting {asset} (1560$) - open the Terminal to watch it run"
+            : $"Boot failed: {asset} not found";
+    }
+
+    async Task onInsertSelected()
+    {
+        // Attach the selected shipped floppy onto the bus at device 1560 (no boot). The user boots
+        // it from the Terminal by powering on, waiting for "#", and typing 1560$.
+        Floppy? f = selectedFloppyItem;
+        string? asset = f?.Asset;
+        if (string.IsNullOrEmpty(asset))
+        {
+            loadedFloppy = f?.Name is null ? "Select a floppy first" : $"{f.Name}: no image available";
+            return;
+        }
+        bool ok = await appService.AttachBpunAssetAsync(asset, 0x370);
+        loadedFloppy = ok
+            ? $"Inserted {asset} @ 1560 - boot it from the Terminal with 1560$"
+            : $"Insert failed: {asset} not found";
+    }
+
+    void onEject()
+    {
+        loadedFloppy = "";
+    }
+
+    // ---- Upload-your-own-image flow ----
+    private byte[]? uploadedBytes;
+    private string? uploadedName;
+    private string uploadStatus = "";
+
+    async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            IBrowserFile file = e.File;
+            uploadedName = file.Name;
+            using MemoryStream ms = new MemoryStream();
+            // 2 MB cap is plenty for any BPUN (largest shipped image is ~50 KB).
+            await file.OpenReadStream(2 * 1024 * 1024).CopyToAsync(ms);
+            uploadedBytes = ms.ToArray();
+            uploadStatus = $"Loaded '{uploadedName}' ({uploadedBytes.Length} bytes) - now Insert it, then type the load command in the Terminal.";
+        }
+        catch (Exception ex)
+        {
+            uploadedBytes = null;
+            uploadStatus = $"Upload failed: {ex.Message}";
+        }
+    }
+
+    void onPowerOnAndBootUpload(int deviceBase)
+    {
+        if (uploadedBytes is null)
+        {
+            uploadStatus = "Pick a .BPUN file first.";
+            return;
+        }
+        bool tape = deviceBase == 0x100;
+        // One click: attach the uploaded image, power on, wait for OPCOM, auto-type the command.
+        appService.PowerOnAndBoot(uploadedBytes, deviceBase);
+        loadedFloppy = $"{uploadedName} @ device {(tape ? "400 (paper tape)" : "1560 (floppy)")}";
+        uploadStatus = $"Booting '{uploadedName}' with {(tape ? "400$" : "1560$")} - open the Terminal to watch it run.";
+    }
+
+    void onAttach(int deviceBase)
+    {
+        if (uploadedBytes is null)
+        {
+            uploadStatus = "Pick a .BPUN file first.";
+            return;
+        }
+        bool tape = deviceBase == 0x100;
+        string command = tape ? "400$" : "1560$";
+        // Plug it onto the bus WITHOUT booting - the user types the command in the Terminal.
+        appService.AttachBinaryLoadDevice(uploadedBytes, deviceBase);
+        loadedFloppy = $"{uploadedName} @ device {(tape ? "400 (paper tape)" : "1560 (floppy)")}";
+        uploadStatus = $"Inserted '{uploadedName}'. Go to the Terminal, power on, wait for '#', then type  {command}  to load & run it.";
+    }
+}

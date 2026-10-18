@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NDMicroCpu.Core</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      The control store images the CPU loads at start (Cpu.LoadCS reads MicroCode\<cpu>.CODE next
+      to the assembly) and the matching symbol and listing files the CLI and the tests read.
+      They are the output of the NDMicroAsm assembler for ND-110-RASK.uc and ND-120-DELILAH-L.uc;
+      regenerate them there and copy them here, never edit them.
+    -->
+    <None Include="microcode\*.CODE;microcode\*.SYMBOLS.TXT;microcode\*.LISTING.TXT" Link="MicroCode\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,203 @@
+﻿@using static System.Net.WebRequestMethods;
+@inject IAppService appService
+@inject HttpClient Http
+
+@implements IDisposable
+
+<style>
+
+    .border-always {
+        border: 1px solid;
+        white-space: pre-wrap;
+    }
+
+
+    .decorationGlyphMarginClassRed {
+        background: red;
+    }
+
+    .decorationGlyphMarginClass {
+        background: black;
+    }
+
+    .decorationContentClass {
+        background: lightblue;
+    }
+
+    #ucText_xxx {
+        height: 300px;
+        width: 600px;
+    }
+
+</style>
+
+
+<StandaloneCodeEditor @ref="_ucText_editor" Id="ucText" ConstructionOptions="EditorConstructionOptions" OnContextMenu="OnContextMenu" />
+
+@code
+{
+    [Parameter]
+    public string? sourceCode { get; set; }
+
+    private StandaloneCodeEditor? _ucText_editor { get; set; }
+
+    // The source last pushed into the Monaco model. EditorConstructionOptions only runs ONCE (at
+    // editor construction), so when sourceCode changes later (e.g. a CPU switch swaps the microcode
+    // listing) we must push the new text into the model ourselves - see OnParametersSetAsync.
+    private string? _appliedSource;
+
+
+    string Assembly = string.Empty;
+    string Output = string.Empty;
+    string Command = string.Empty;
+    private int _currentLine = -1;
+
+
+    #region Initialize and clean up
+
+
+    public async Task SetActiveLines(int first, int last)
+    {
+        if (_ucText_editor != null)
+        {
+            await SetLineFocus(first, last, _ucText_editor);
+        }
+    }
+
+
+    public void Dispose()
+    {
+        // Clean up hooked event handlers
+        //s8service.Parser.s8d.cpu.CpuStepHandler -= CpuStepLineHandler;
+    }
+
+    #endregion Initialize and clean up
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (!firstRender)
+        {
+            if (_ucText_editor != null)
+            {
+                await SetLineFocus(_currentLine, _currentLine, _ucText_editor);
+            }
+        }
+
+        //return base.OnAfterRenderAsync(firstRender);
+    }
+
+    // Re-apply the source into the Monaco model whenever the sourceCode parameter changes. This
+    // covers BOTH the initial async load (microcode arrives after the editor is constructed) AND a
+    // CPU switch (the whole listing is replaced). Without it the editor shows only whatever
+    // sourceCode was at construction time (EditorConstructionOptions is a one-shot).
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_ucText_editor != null && !string.Equals(sourceCode, _appliedSource, StringComparison.Ordinal))
+        {
+            _appliedSource = sourceCode;
+            await _ucText_editor.SetValue(sourceCode ?? string.Empty);
+        }
+    }
+
+    @* private void CpuStepLineHandler(object sender, CpuStepInfo cpustep)
+    {
+        _currentLine = (cpustep.pc / 2) + 1;
+        //SetLineFocus(_currentLine);
+    }*@
+
+    private string[]? decorationIds;
+
+    // Set active debugging line in editor
+    internal async Task SetLineFocus(int firstLine, int lastLine, StandaloneCodeEditor editor)
+    {
+        Console.WriteLine($"Stepping to {firstLine}");
+
+        //await editor.ResetDeltaDecorations(); // remove other decorations
+        //await editor.ResetDeltaDecorations(); // remove other decorations - 2nd call. It seems there is a bug that make decorations hang lingering around sometimes
+
+        if (firstLine < 0) return;
+
+        // Scroll
+        await editor.RevealLine(firstLine);
+        await editor.RevealLine(lastLine);
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+                new ModelDeltaDecoration
+                {
+                    Range = new BlazorMonaco.Range(firstLine,1,lastLine,1),
+                    Options = new ModelDecorationOptions
+                    {
+                        IsWholeLine = true,
+                        ClassName = "decorationContentClass",
+                        GlyphMarginClassName = ""
+                    }
+                }
+        };
+
+
+        //decorationIds = AsyncHelper.RunSync<string[]>(() => _editor.DeltaDecorations(null, newDecorations));
+        decorationIds = await editor.DeltaDecorations(decorationIds, newDecorations);
+        // You can now use 'decorationIds' to change or remove the decorations
+    }
+
+
+    public string[]? bpdecorationIds;
+
+
+    public async Task RemoveLineBreakpoint(string[] decor)
+    {
+        if (_ucText_editor != null)
+        {
+            bpdecorationIds = await _ucText_editor.DeltaDecorations(decor, new ModelDeltaDecoration[] { });
+        }
+    }
+
+
+    public async Task SetLineBreakpoint(int sourceCodeLine)
+    {
+        if (_ucText_editor == null) return;
+        //Console.WriteLine($"Stepping to {sourceCodeLine}");
+        if (sourceCodeLine < 0) return;
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+                new ModelDeltaDecoration
+                {
+                    Range = new BlazorMonaco.Range(sourceCodeLine,1,sourceCodeLine,1),
+                    Options = new ModelDecorationOptions
+                    {
+                        IsWholeLine = true,
+                        ClassName = "",
+                        GlyphMarginClassName = "decorationGlyphMarginClassRed"
+                    }
+                }
+        };
+
+        bpdecorationIds = await _ucText_editor.DeltaDecorations(bpdecorationIds, newDecorations);
+    }
+
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        // Record the value we hand Monaco at construction so OnParametersSetAsync only pushes a
+        // new value when it ACTUALLY changes (avoids a redundant SetValue right after construction).
+        _appliedSource = sourceCode;
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = false,
+                Language = "uc", //SLEDE8
+                GlyphMargin = true,
+                LineNumbers = "off",
+                ReadOnly = true,
+                Value = sourceCode
+            };
+    }
+
+    private void OnContextMenu(EditorMouseEvent eventArg)
+    {
+        Console.WriteLine("OnContextMenu : " + System.Text.Json.JsonSerializer.Serialize(eventArg));
+    }
+
+}

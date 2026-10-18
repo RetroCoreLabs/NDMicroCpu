@@ -1,0 +1,464 @@
+@page "/"
+@inject IJSRuntime JsRuntime
+@inject IAppService appService
+
+
+<style>
+    .mud-card-title {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .my-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        margin-bottom: 32px;
+    }
+
+    .bold-header {
+        font-size: 32px;
+        font-weight: bold;
+        color: #2196f3;
+        margin-bottom: 16px;
+    }
+
+    .subheader {
+        margin-bottom: 24px;
+        color: #666;
+    }
+
+    MudText {
+        color: #666;
+        margin-bottom: 16px;
+    }
+
+</style>
+
+
+<MudContainer Class="mt-16">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">Welcome to the ND-110 Microcode Emulator</MudText>
+    <MudText Align="Align.Center">
+        The emulator is designed to implement all key modules from the microcode CPU.
+        These modules are critical components that enable the CPU to execute instructions and perform operations.
+    </MudText>
+
+    <MudGrid Class="mt-8">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">ALU</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <div class="d-flex justify-center">
+                        <MudText GutterBottom="true" Typo="Typo.body2">The Arithmetical and Logical Unit gate array (ALU, also known as the BUFALU)</MudText>
+                    </div>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The emulator's Arithmetic Logic Unit (ALU) is modeled after the Am2901 bit-slice processor.
+                        In the original ND-100 system, there were four 4-bit ALUs, providing a total of 16 bits of processing power.
+                        The emulator, however, simulates one 16-bit ALU
+                    </MudText>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        In addition to the ALU, the emulator includes several other registers, such as the data bus register,
+                        general-purpose register, and internal register block.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">RMIC</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <div class="d-flex justify-center">
+                        <MudText GutterBottom="true" Typo="Typo.body2">Microprogram Sequencer - RMIC</MudText>
+                    </div>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The RMIC replaced three 74S482 sequencers and approximately 30 other integrated circuits (ICs),
+                        resulting in a more streamlined and efficient system.
+                    </MudText>
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        One of the key features of the RMIC is the use of an advanced microprogram sequencer with a built-in stack.
+                        This allows the system to take advantage of the latest microprogramming techniques, such as microbranching, microsubroutines, and repetitive microinstruction execution.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">RMAC</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <div class="d-flex justify-center">
+                        <MudText GutterBottom="true" Typo="Typo.body2">The Micro Address Controller. The MAC, also called RMAC, for Rask MAC (Speedy MAC)</MudText>
+                    </div>
+                    <MudDivider /> <br />
+
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The Micro Address Controller (RMAC), 
+                        provides hardware support for address arithmetic, which was previously performed in microcode on the ND-100 system.
+                        
+                        It calculates and updates the next Program Counter (or register P)
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+<br />
+
+
+<MudContainer Class="mt-16">
+    <MudGrid Class="mt-8">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Interrupt controller</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">The system is based on an emulation of two Am2914 Priority Interrupt Controllers cascaded together to provide a total of 16 interrupt levels. </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Memory</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The RegisterFile is comprised of 256 16-bit wide registers organized into sixteen by sixteen blocks.
+                        These registers are used to store various values needed by the CPU.
+                        Specifically, half of the RegisterFile is reserved for storing CPU register values related to the current level of the CPU, ranging from level 0 to 15.
+                    </MudText>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        2 Megawords of memory (RAM) is available.
+                    </MudText>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The memory management system converts the 16-bit virtual addresses from RMAC to physical memory addresses that are used on the ND-110 bus
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Devices</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The ND-110 CPU card features two built-in devices: a real-time clock and a UART for communicating with the console.
+                        The real-time clock provides accurate timekeeping capabilities, while the UART enables communication between the CPU and external devices, such as the console.
+                        These devices play a critical role in the operation and functionality of the ND-110 CPU card.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+
+<br />
+<MudDivider></MudDivider>
+
+<MudContainer Class="mt-16">
+    
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <MudIcon Icon="@Icons.Material.Filled.BugReport" />
+        <MudText>The ND-110 Microcode debugger</MudText>
+        <MudIcon Icon="@Icons.Material.Filled.BugReport" />
+    </div>
+    
+    <MudGrid Class="mt-8">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Stepping</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+
+                <MudCardContent>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The debugger is equipped with the capability to step through micro-code instructions while simultaneously displaying the original source code and providing detailed information on the decoded microcode.
+                        It allows you to trace the execution path of the code and analyze how the microprocessor is processing each instruction.
+                    </MudText>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        It's worth noting that the original source code from December 1986 comprises over 17,000 lines of code.
+                        Despite the complexity of the codebase, the debugger provides a comprehensive and user-friendly interface that facilitates efficient debugging and analysis.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Breakpoint</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The debugger supports the addition and deletion of breakpoints, which is particularly useful when you want to execute the code instead of stepping through each instruction.
+                        By setting breakpoints at specific points in the code, you can pause execution at those points, inspect the state of the program, and then continue executing the code from where you left off.
+                        This can greatly aid in debugging and troubleshooting issues in the code.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Register</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudDivider /> <br />
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The debugger tool allows you to not only inspect but also modify register values within the CPU, ALU, and Interrupt controller.
+                        Additionally, there are helpful ToolTips that provide further information about the registers when you hover your mouse over a specific field.
+                        These ToolTips can aid in better understanding the functionality and purpose of each register.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+<br />
+<MudDivider></MudDivider>
+
+<MudContainer Class="mt-16">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">The ND-110 Machine</MudText>
+    <MudText Align="Align.Center">In addition to the microcode CPU..</MudText>
+    <br />    
+    The emulator also offers functionality at the ND Machine level, including an assembler to edit and assemble your program using ND opcodes, as well as a macro-level debugger to step through your compiled program. All this is executed inside the microcode-based CPU, so you can be confident that you're getting a true-to-life simulation of the ND-110.
+    <br />
+    <br />
+    <MudAlert Severity="Severity.Error">The ND Machine level part is just partly implemented. Come back later for full functionality</MudAlert>
+    <MudGrid Class="mt-8">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Debugger</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The built in Macro Assembler makes it easy to edit and compile ND-100/ND-110 opcodes. 
+                        With the added functionality of loading and saving BPUN files its easy to load original ND programs or exporting your own code to a real ND machine.
+                    </MudText>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        Quite similar like the microcode debugger you are able to step the code while viewing the source code (and the compiled binaries) 
+                        while inspecting and modifying ALU registers.
+                    </MudText>
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        You are also able to set breakpoints and run the code until it hits breakpoints
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Terminal</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        The terminal module makes is possible to run your own program or a program loaded from a BPUN file is it would be running on the console of an original ND-110.
+                        You have text output and keyboard input, and the possibility to execute Master Clear (MACL), RUN (to start your program) or LOAD to boot from floppy.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Class="bold-header">Floppy drive</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        Select between a pre defined set of available floppy disk, load or eject the floppies.
+                    </MudText>
+                    <MudText GutterBottom="true" Typo="Typo.body1">
+                        You can also upload your own 360Kb or 1.2 MB floppy IMG file.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+<br />
+<MudDivider></MudDivider>
+<br />
+    
+<MudCarousel Class="mud-width-full" Style="height:300px;" ShowArrows="true" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="true" TData="object">
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <MudImage Src="Assets/carousel/nd110sat.png"></MudImage>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/cpu.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/ndmanuals.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/interruptsystem.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/microcode.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/ccontrol.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/registerfile.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/alu.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/sintran-sttin.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+
+    <MudCarouselItem Transition="Transition.Fade">
+        <div class="d-flex justify-center align-center" style="height:100%">
+            <div class="image-container">
+                <MudImage Src="Assets/carousel/nd110versions.png"></MudImage>
+            </div>
+        </div>
+    </MudCarouselItem>
+    
+</MudCarousel>
+
+
+<br />
+
+<MudAlert Severity="Severity.Warning">All parts of the Application is still under development, so expect to se bugs and unfinished functionality</MudAlert>
+<br />
+<MudAlert Severity="Severity.Normal">You can find more documentation about the Norsk Data machines here: <MudLink Href="https://ndwiki.org" Typo="Typo.body2" Color="Color.Inherit"><b>https://ndwiki.org</b></MudLink></MudAlert>
+
+<br />
+<MudDivider></MudDivider>
+<div style="display: flex; justify-content: center; padding: 12px 0 24px 0;">
+    <MudText Typo="Typo.caption" Style="color:#999;">Last compiled: @buildTimestamp</MudText>
+</div>
+
+@code {
+    // Build timestamp stamped into the assembly at compile time by the
+    // StampBuildTimestamp MSBuild target (see NDMicroCpu.Web.csproj). Read here via
+    // reflection and shown in the footer above. No LINQ / no foreach per project rules.
+    private string buildTimestamp = "unknown";
+
+    protected override void OnInitialized()
+    {
+        var attrs = GetType().Assembly.GetCustomAttributes(
+            typeof(System.Reflection.AssemblyMetadataAttribute), false);
+        for (int i = 0; i < attrs.Length; i++)
+        {
+            var meta = (System.Reflection.AssemblyMetadataAttribute)attrs[i];
+            if (meta.Key == "BuildTimestampUtc")
+            {
+                buildTimestamp = meta.Value ?? "unknown";
+                break;
+            }
+        }
+    }
+}

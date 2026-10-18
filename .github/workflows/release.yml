@@ -1,0 +1,105 @@
+# Turn a v* tag into a GitHub release carrying the self-contained command-line programs for each
+# platform: NDMicroCpu (the console machine), ndmicrocli, ndmicrodebug and ndmicrodebug-client.
+# The web emulator is not part of a release; it is a site, published separately.
+#
+#   test     The same test run build.yml does, repeated here so a tag can never publish a build
+#            that was not tested.
+#
+#   publish  One single-file, self-contained copy of each program per runtime - win-x64, linux-x64,
+#            osx-x64 and osx-arm64 - each built on its own operating system's runner. The publish
+#            switches are the ones build.ps1 uses; read the comment there before changing any.
+#
+#   release  Runs once, after every publish job succeeded, and attaches the files to the release
+#            for the tag. One failed platform means no release at all.
+#
+# Make a release:   git tag v0.1.0 && git push origin v0.1.0
+# The tag is the release name AND the version: the publish job passes -p:Version=<tag without the
+# leading v>. VersionPrefix in Directory.Build.props is only the version of local builds.
+name: release
+on:
+  push:
+    tags: [ 'v*' ]
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+      - run: dotnet restore
+        working-directory: src
+      - run: dotnet build -c Release --no-restore -warnaserror -nodeReuse:false
+        working-directory: src
+      - run: dotnet test -c Release --no-build -nodeReuse:false
+        working-directory: src
+
+  publish:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            suffix: .exe
+            asset: NDMicroCpu-win-x64.zip
+          - os: ubuntu-latest
+            rid: linux-x64
+            suffix: ''
+            asset: NDMicroCpu-linux-x64.tar.gz
+          # macos-13 was retired; macos-15-intel is the Intel image that is still live.
+          - os: macos-15-intel
+            rid: osx-x64
+            suffix: ''
+            asset: NDMicroCpu-osx-x64.tar.gz
+          - os: macos-latest
+            rid: osx-arm64
+            suffix: ''
+            asset: NDMicroCpu-osx-arm64.tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+      - name: Publish every program
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          foreach ($proj in 'NDMicroCpu.Machine', 'NDMicroCpu.Cli', 'NDMicroCpu.Debugger', 'NDMicroCpu.Debugger.Client') {
+            dotnet publish "src/$proj/$proj.csproj" -c Release -r ${{ matrix.rid }} --self-contained true `
+              -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+              -p:SatelliteResourceLanguages=en -p:DebugType=none -p:GenerateDocumentationFile=false `
+              -p:EnableCompressionInSingleFile=true -p:Version=$version -o out -nodeReuse:false
+            if ($LASTEXITCODE -ne 0) { throw "publish failed: $proj" }
+          }
+          Get-ChildItem out
+      - name: Package
+        shell: pwsh
+        run: |
+          if ('${{ matrix.asset }}'.EndsWith('.zip')) {
+            Compress-Archive -Path out/* -DestinationPath '${{ matrix.asset }}'
+          } else {
+            tar -czf '${{ matrix.asset }}' -C out .
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+          if-no-files-found: error
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*
+          generate_release_notes: true

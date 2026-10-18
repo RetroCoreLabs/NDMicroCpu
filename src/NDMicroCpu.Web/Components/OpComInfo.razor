@@ -1,0 +1,430 @@
+﻿<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Dense="true" Text="OPERATOR COMMUNICATION FROM THE CONSOLE (OPCOM)">
+
+        <p>The operator may communicate directly with the microprogram from the console (terminal no. 1). To do this the CPU must be in OPCOM or STOP mode. The Opcom field will be lit. OPCOM mode may be entered from SINTRAN by entering the @@OPCOM SINTRAN command or by pressing the OPCOM button on the display panel.</p>
+        <p>The operator can use these routines to:</p>
+        <div>
+            <ul>
+                <li>&bull; Load and start the operating system (SINTRAN)</li>
+                <li>&bull; Perform backup and maintenance tasks</li>
+                <li>&bull; Debug programs</li>
+            </ul>
+        </div>
+        <br />
+        <p><strong>NOTE:</strong> All values and addresses in the following description of OPCOM are assumed to be in octal except when explicitly stated otherwise.</p>
+        <p>Commands to the microprogram consist of one or more characters. All characters entered are significant. Spaces are not permitted within commands. The space character itself is interpreted as a command to ignore all previously entered characters. Most commands are interpreted immediately and need not (must not) be ended with carriage return. When a command requires a carriage return, it is shown (‘cr’ sign).</p>
+        <p>The following commands may be used whenever the CPU is in OPCOM mode</p>
+
+        <table style="border-collapse: collapse; border: 2px solid black;">
+            <thead>
+                <tr>
+                    <th style="padding: 8px; border: 1px solid black;">Command</th>
+                    <th style="padding: 8px; border: 1px solid black;">Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">/</td>
+                    <td style="padding: 8px; border: 1px solid black;">Examine memory location or register</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">RD<MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Class="mr-2" /> </td>
+                    <td style="padding: 8px; border: 1px solid black;">Dump registers</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">E<MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Class="mr-2" /></td>
+                    <td style="padding: 8px; border: 1px solid black;">Specify physical or virtual address for / command</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">F<MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Class="mr-2" /></td>
+                    <td style="padding: 8px; border: 1px solid black;">Specify the display format</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">*</td>
+                    <td style="padding: 8px; border: 1px solid black;">Print the address of the last examined memory location</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">[ESC]</td>
+                    <td style="padding: 8px; border: 1px solid black;">Terminates OPCOM mode. This command has no effect if the CPU is in STOP mode.</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">MACL<MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Class="mr-2" /></td>
+                    <td style="padding: 8px; border: 1px solid black;">Master clear (but no microcode load)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid black;">STOP<MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Class="mr-2" /></td>
+                    <td style="padding: 8px; border: 1px solid black;">Puts CPU in STOP mode</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Many of the above commands may require parameters before the commands in order to work. See the description of the individual command for details.</p>
+        <p>The following commands are legal only in STOP mode:</p>
+        <table style="border-collapse: collapse; border: 2px solid black;">
+            <thead>
+                <tr>
+                    <th style="border: 2px solid black; padding: 8px;">Command</th>
+                    <th style="border: 2px solid black; padding: 8px;">Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">!</td>
+                    <td style="border: 2px solid black; padding: 8px;">Start program in main memory.</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">Z</td>
+                    <td style="border: 2px solid black; padding: 8px;">Single step instruction.</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">$ or &amp;</td>
+                    <td style="border: 2px solid black; padding: 8px;">Bootstrap load</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">.</td>
+                    <td style="border: 2px solid black; padding: 8px;">Set breakpoint</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">“</td>
+                    <td style="border: 2px solid black; padding: 8px;">Manual instruction command.</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 8px;">#</td>
+                    <td style="border: 2px solid black; padding: 8px;">Start microprogrammed memory test.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>All other characters are answered with a ?, and characters written before the unrecognised character will be forgotten (as if 'space' had been typed).</p>
+
+    </MudExpansionPanel>
+    <MudExpansionPanel Dense="true" Text="LOAD COMMANDS ($ and &)">
+        <p>The commands $ and &amp; both cause the CPU to load (and possibly execute) a program from a storage device. The device address is defined by an octal value entered immediately before the command. If the value is omitted, the load will be defined by the setting on the Automatic Load Descriptor (ALD) switch on the CPU card.</p>
+        <p>The following table shows how the ALD switch setting affects the load operation. The action taken is the same regardless of whether the load was due to an extended power failure, the load commands ($ or &amp;) or the button [LOAD].</p>
+
+
+        <table style="border-collapse: collapse; border: 2px solid black; padding: 5px;">
+            <thead>
+                <tr>
+                    <th style="border: 2px solid black; padding: 5px;">ALD</th>
+                    <th style="border: 2px solid black; padding: 5px;">I12 (*4)</th>
+                    <th style="border: 2px solid black; padding: 5px;">Load action (1)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">15</td>
+                    <td style="border: 2px solid black; padding: 5px;">0</td>
+                    <td style="border: 2px solid black; padding: 5px;">Note 2</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">14</td>
+                    <td style="border: 2px solid black; padding: 5px;">1560</td>
+                    <td style="border: 2px solid black; padding: 5px;">BPUN load from floppy (1560) and run (*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">13</td>
+                    <td style="border: 2px solid black; padding: 5px;">20500</td>
+                    <td style="border: 2px solid black; padding: 5px;">Bootstrap load from Winchester disk (500) and run (*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">12</td>
+                    <td style="border: 2px solid black; padding: 5px;">21540</td>
+                    <td style="border: 2px solid black; padding: 5px;">Bootstrap load from SMD disk (1540) and run (*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">11</td>
+                    <td style="border: 2px solid black; padding: 5px;">400</td>
+                    <td style="border: 2px solid black; padding: 5px;">BPUN load from paper tape (400) and run (*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">10</td>
+                    <td style="border: 2px solid black; padding: 5px;">1600</td>
+                    <td style="border: 2px solid black; padding: 5px;">BPUN load from HDLC (1600) and run (*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">9</td>
+                    <td style="border: 2px solid black; padding: 5px;">Run (no load)</td>
+                    <td style="border: 2px solid black; padding: 5px;">(*3)</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">8</td>
+                    <td style="border: 2px solid black; padding: 5px;">Run (no load)</td>
+                    <td style="border: 2px solid black; padding: 5px;">(*3)</td>
+                </tr>
+
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">7</td>
+                    <td style="border: 2px solid black; padding: 5px;">100000</td>
+                    <td style="border: 2px solid black; padding: 5px;">Note 2</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">6</td>
+                    <td style="border: 2px solid black; padding: 5px;">101560</td>
+                    <td style="border: 2px solid black; padding: 5px;">Binary load from 1560</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">5</td>
+                    <td style="border: 2px solid black; padding: 5px;">120500</td>
+                    <td style="border: 2px solid black; padding: 5px;">Mass storage from 500</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">4</td>
+                    <td style="border: 2px solid black; padding: 5px;">121540</td>
+                    <td style="border: 2px solid black; padding: 5px;">Mass storage from 1540</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">3</td>
+                    <td style="border: 2px solid black; padding: 5px;">100400</td>
+                    <td style="border: 2px solid black; padding: 5px;">Binary load from 400</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid black; padding: 5px;">2</td>
+                    <td style="border: 2px solid black; padding: 5px;">101600</td>
+                    <td style="border: 2px solid black; padding: 5px;">Binary load from 1600</td>
+                </tr>
+
+            </tbody>
+        </table>
+       
+        <br />
+        <p>Note 1: The action will be taken if:</p>
+        <ul>
+            <li>&bull; $ or &amp; (without preceding value) has been typed</li>
+            <li>&bull; The [LOAD] button has been pressed</li>
+            <li>&bull; The power has been restored and the keyswitch is in the lock position, but the standby power has been lost (extended power failure).</li>
+        </ul>
+        <br />
+        <p>Note 2: No load. The CPU is put in STOP mode.</p>
+
+        <p>Note 3: Run from address 20 (oct)</p>
+
+        <p>Note 4: Contents of internal register 112 reflects ALD setting</p>
+
+        <p>ALD switch settings 8 to 15 specify load and run, settings 2 to 7 specify load only. ALD settings 4, 5, 12 and 13 specify a bootstrap load from a disk. All other settings expect BPUN format. The start address is always the power fail restart address 20 (oct).</p>
+
+        <br />
+        <h3>LOAD FROM AN OPERATOR SPECIFIED ADDRESS</h3>
+        <p>The operator may specify the device address from the console. The device address is entered immediately before the &amp; (or $). The default format is BPUN. SMD and Winchester disks use bootstrap format. To specify a bootstrap load set bit 13 of the device address to 1 (ie if the device address is 1550, enter 21550&amp;)</p>
+
+        <h5>START PROGRAM (!)</h5>
+        <p>Execution is started at the address entered immediately preceding the ! command. If no address is given, the current value of the program counter (P register is used).</p>
+        <p>Some important addresses when running SINTRAN are:</p>
+        <ul>
+            <li>20: Power fail restart address</li>
+            <li>21: Warm start address</li>
+            <li>22: Cold start address</li>
+        </ul>
+
+        <br />
+        <h5>INTERNAL MEMORY TEST (#)</h5>
+        <p>A memory test routine in the microprogram may be started with the # command. Memory is tested in banks (segments) of 64 Kword. The bank number is entered immediately before the # character.</p>
+        <p>A second # character is printed on the console if the test is successful. If an error is found, the test stops and ? is sent to the console. The registers then contain the following information:</p>
+        <ul>
+            <li>&bull; T: Failing bits</li>
+            <li>&bull; P: Failing address</li>
+            <li>&bull; D: Error pattern</li>
+            <li>&bull; L: Test pattern</li>
+            <li>&bull; B: Start address</li>
+            <li>&bull; X: Stop address</li>
+        </ul>
+
+    </MudExpansionPanel>
+    <MudExpansionPanel Dense="true" Text="PROGRAM DEBUGGING COMMANDS">
+        <p>Some OPCOM commands are chiefly intended for program debugging. These commands permit the user to alter memory locations and registers, set breakpoints, single step the CPU, and execute a single instruction entered from the console.</p>
+
+        <br />
+        <h5>SINGLE STEP EXECUTION</h5>
+        <p>A single Z character will cause one instruction (or one interrupt level change) to be executed. If a value is entered before the Z character, that number of instructions will be executed.</p>
+        <p>Page faults, protect violations, and interrupt level changes are executed correctly but are counted as extra instructions. An extra overhead of approximately 3 us is introduced between each instruction when the CPU single-steps instructions.</p>
+
+        <br />
+        <h5>SET BREAKPOINT (.)</h5>
+        <p>Enter the breakpoint address followed by the . (full stop/period) character. When the program reaches the entered address, execution stops, and the . character is echoed to the console. An extra overhead of approximately 3 us is introduced between each instruction when the CPU single-steps instructions.</p>
+        <p>If the specified address is never reached, execution continues until a character other than 0-7 or A-Y is typed.</p>
+
+        <br />
+        <p>EXECUTE ENTERED INSTRUCTION (")</p>
+        <p>This command starts continuous execution of the instruction specified as an argument. The execution stops when a character other than 0-7 or A-Y is typed.</p>
+        <p>Example:</p>
+        <p>The paging-on instruction (PON) has the octal code 150410. The OPCOM command <code>150410"</code> turns on the paging system.</p>
+
+        <br />
+        <h5>READ/WRITE I/O DEVICE (IO/)</h5>
+        <p>Enter the device address followed immediately by IO/. The CPU executes a 10x instruction using the given device address.</p>
+        <p>The usual rules apply for direction (even address: input to CPU; odd address: output from CPU).</p>
+        <p>Output data is taken from the OPR pseudo-register. Input data is displayed on the console but not stored anywhere. None of the working registers is affected.</p>
+
+        <br />
+        <h5>PRINT CURRENT LOCATION (*)</h5>
+        <p>When * is typed, an octal number is printed indicating the current physical or virtual address on which a memory examine or memory deposit will take place. The current location counter is set by the examine command /, and is incremented each time carriage return is typed afterward.</p>
+
+        <br />
+        <h5>EXAMINE MODE (E)</h5>
+        <p>To specify the page table to use for subsequent OPCOM memory commands, enter the page table number (0 to 17 oct) before the E command.</p>
+        <p>Note: The number used here is the actual page number. This is different from the NO-100 CPU where a code was used.</p>
+        <p>If no number is given, subsequent memory commands will apply to physical memory.</p>
+        <br />
+        <p>Example: <code>5E ‘cr’</code></p>
+        <p>If paging is on, future memory references will be made via page table 5.</p>
+        <br />
+
+        <h5>EXAMINE MEMORY (/)</h5>
+        <p>Enter the memory location address followed immediately by the / character. The contents of the location will be echoed to the console.</p>
+        <p>You then have the option of changing the contents of that location or viewing the contents of the next location.</p>
+        <p>Changing the contents in STOP mode:</p>
+        <p>If you enter an octal value followed by a carriage return, the memory location will be changed to that value. The contents of the next location will be displayed and, if you wish, you may change that location in the same way. Just entering carriage return displays the contents of the next location without changing the previous one.</p>
+        <p>Changing the contents in RUN mode:</p>
+        <p>Changing the contents of memory locations while SINTRAN is running can produce unpredictable results! To guard against doing this inadvertently, you must follow the octal value by DEP (deposit).</p>
+        <p>Examples:</p>
+        <p>In the following examples, user input is underlined.</p>
+        <p>#100/137777 - display contents of address 100</p>
+        <p>#100/137777 0‘cr’ - display contents of address 100 and change it to 0 (CPU is in STOP mode)</p>
+        <p>#100/137777 0DEP - the same as the second example but the CPU is in RUN mode</p>
+        <p>If the paging system is used, you may specify virtual addressing by setting the page table to be used with the E command.</p>
+        <p>If you specify virtual addressing, page faults and protect violations are ignored. If physical addressing is used, the address may contain up to 24 bits (8 octal digits).</p>
+        <p>MEMORY DUMP (&lt;)</p>
+        <p>To dump the contents of an area of memory to the console, enter the start address, the memory dump character &lt;, the end address, and terminate the command with carriage return. The contents of the memory addresses between the start address and the end address are printed on the console, with 8 addresses per line.</p>
+        <p>The dump is taken from the 64 Kword memory bank (segment) last addressed by a memory examine command /. A memory examine command should always be done before a memory dump. The dump may be stopped by pressing any key.</p>
+
+        <br />
+        <h5>EXAMINE REGISTERS (R/)</h5>
+        <p>The form of this command is the same as for the examine memory command /. The register name is written before the command instead of the memory address. The program level may be specified (0-17) before the register name. If the program level is omitted, program level zero is assumed.</p>
+        <p>The contents of the register is displayed after the / character. If you want to change the contents, enter the new value in the same way as for the examine memory command. If the CPU is in STOP mode, you must end the value with "DEP".</p>
+        <p>Working registers may be specified by either the form Ry where y is a number in the range 0 - 7 or the name of the register. R0 - R7 correspond to : S, D, P, B, L, A, T, X respectively. Internal registers are addressed as Iy where y is a number in the range 0 - 15.</p>
+        <p>I0 - I15 correspond to the internal registers: PANS (0), STS (1), OPR (2)*. PSR (3). PVL (4), IIC (5), PID (6), PIE (7), CSR (10), ACTL (11), ALD(12). PES (13), PCR (14), PEA (15).</p>
+        <p>Note (*) : OPR is a simulated panel switch register which can be written to from OPCOM. Programs can read the contents with the TRA OPR instruction.</p>
+        
+        <br />
+        <h6>Examples:</h6>
+        <table style="border: 1px solid black; border-collapse: collapse;">
+            <tbody>
+                <tr>
+                    <td style="border: 1px solid black; padding: 5px;">#<u>A/</u>126500</td>
+                    <td style="border: 1px solid black; padding: 5px;">Examine A register on level 0</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; padding: 5px;">#<u>7P/</u>140003</td>
+                    <td style="border: 1px solid black; padding: 5px;">Examine P register on level 7</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; padding: 5px;">#<u>7R2/</u>140003</td>
+                    <td style="border: 1px solid black; padding: 5px;">Examine R2 (= P) on level 7</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; padding: 5px;">#<u>I7/</u>030013</td>
+                    <td style="border: 1px solid black; padding: 5px;">Examine PIE register (internal register 7)</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; padding: 5px;">#<u>OPR/</u>00100</td>
+                    <td style="border: 1px solid black; padding: 5px;">Examine the OPR pseudo register</td>
+                </tr>
+            </tbody>
+        </table>
+        
+
+        <br />
+        <h5>DISPLAY PSEUDO-REGISTERS</h5>
+        <p>In addition to the registers listed above, there are three other pseudo-registers that may be addressed. Addressing these pseudo-registers affects the (optional) display panel only.</p>
+        <ul>
+            <li>
+                <h6>ACT</h6>
+                <p>The display shows active levels, clock and activity (normal display).</p>
+            </li>
+            <li>
+                <h6>BUS</h6>
+                <p>
+                    The display shows bus activity. A two digit code preceding the command specifies what data is displayed. 
+
+                    <br />
+                    First digit:
+                    <ul>
+                        <li>&bull; 0: CPU data is displayed</li>
+                        <li>&bull; 1: DMA data is displayed</li>
+                        <li>&bull; 2: CPU address is displayed</li>
+                        <li>&bull; 3: DMA address is displayed</li>
+                    </ul>
+
+                    <br />
+                    Second digit:
+                    <ul>
+                        <li>&bull; 0: nothing is displayed</li>
+                        <li>&bull; 1: Read access only is displayed</li>
+                        <li>&bull; 2: Write access only is displayed</li>
+                        <li>&bull; 3: Read and write are displayed</li>
+                    </ul>
+
+                    <br />
+                    Example: <code>23BUS/</code> The display will show all data written from the CPU to memory. The function field of the display will show "ACWR".
+                </p>
+            </li>
+            <li>
+                <h6>OPR</h6>
+                <p>The display shows the contents of the OPR register. This is a simulated panel switch register which can be written to from OPCOM. Programs can read the contents with the TRA OPR instruction.</p>
+            </li>
+            <li>
+                <h6>U</h6>
+                <p>The display shows the contents of a scratch register which can be written to by the TRR LMP instruction. This is used by the DISC-TEMA program to show the cylinder number during disc operations.</p>
+            </li>
+        </ul>
+
+        <br />
+        <h5>REGISTER DUMP (xx&lt;yyRD)</h5>
+        <p>The contents of the working registers on program levels xx to yy are displayed on the console. One register set is displayed per line. The registers are printed in the following order: STS, 0, P, B, L, A, T, X. To dump the register set on only one level xx must be equal to yy. If xx and yy are omitted (&lt;RD), the registers on level 0 are dumped.</p>
+        
+        <br/>
+        <h5>INTERNAL REGISTER DUMP (IRD)</h5>
+        <p>The IRD command displays the 16 internal registers of the CPU. This command is only allowed when the CPU is in STOP mode. This is to avoid unintentional unlocking of PEA, PES and IIC when the CPU is running.</p>
+
+        <h5>SCRATCH REGISTER DUMP (xx&lt;yyRDE)</h5>
+        <p>The RDE command dumps the contents of the 8 scratch registers (only microprogram accessible) on program levels xx to yy. One scratch register set is displayed per line. This command is intended for debugging microprograms only.</p>
+    </MudExpansionPanel>
+    <MudExpansionPanel Dense="true" Text="DISPLAY FORMAT">
+        <h5>DISPLAY FORMAT (uuzzyxF)</h5>
+        <p>
+            This command will define the display format when the optional display unit is included in the system. uuzzyx are octal digits and define the chosen format. F, without argument, or with argument equal to zero) will set the default display format, which is octal format. The fields of the argument have the following meaning:
+        </p>
+        <ul>
+            <h6>x - Number representation code</h6>
+            <ul>
+                <li>&bull; x = 0 Displayed data is in octal representation. zz has no effect.</li>
+                <li>&bull; x = 1 Displayed data is in unary representation, i.e. 4 of the bits in the displayed data are used to light one out of 16 indicators. zz indicates which 4 bits to decode.</li>
+                <li>&bull; x = 2 Displayed data is in binary representation. zz has no effect.</li>
+            </ul>
+
+            <br/>
+            <h6>y - "Stretch" code.</h6>
+            <ul>
+                <li>&bull; y = 0 No stretching</li>
+                <li>&bull; y = 1 Zeros are stretched.</li>
+                <li>&bull; y = 2 Ones are stretched.</li>
+                <li>&bull; Y = 3 Zeros and ones are stretched.</li>
+            </ul>
+            <br/>
+
+            <h6>zz - Lower start bit for unary display.</h6>
+            <ul>
+                <li>&bull; zz = 0-24 Position of lowest bit position to be represented in unary representation.</li>
+            </ul>
+
+            <br/>
+            <h6>uu - Display processor maintenance codes (4 bits)</h6>
+            <ul>
+                <li>&bull; uu = 1 Display year and month</li>
+                <li>&bull; uu = 2 Inhibit message</li>
+                <li>&bull; uu = 4 Initialize panel processor</li>
+                <li>&bull; uu = 10 (oct) Abort message</li>
+            </ul>
+        </ul>
+
+        <br />
+        <p>Example:</p>
+        <p><code>#1421F‘cr’</code></p>
+        <p>After this format specification, bits 14-17 oct (bits 12-15) will be shown in unary representation with afterglow on ones. (If the display shows an address, this is equivalent to pushing the DECODE ADDRESS button on NORD-10/S.)</p>
+
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+
+@code {
+
+}

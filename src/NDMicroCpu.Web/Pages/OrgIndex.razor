@@ -1,0 +1,144 @@
+﻿@page "/old-index"
+@inject IJSRuntime JsRuntime
+@inject IAppService appService
+
+
+<PageTitle>Index</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Welcome to the ND-110 Microcode Emulator</MudText>
+
+<div style="background-image: url('/Assets/cpu.png'); background-size: cover; background-repeat: no-repeat; ">
+    <MudCard Elevation="25" Class="rounded mt-8" Style="background-color: rgba(255, 255, 255, 0.85);">
+        <MudCardContent>
+            <MudText Class="text-center mb-4" Typo="Typo.h5">This emulator implements the following modules from the microcode CPU</MudText>
+            <ul class="list-disc pl-6 mt-4">
+                <li>
+                    <MudText Typo="Typo.body1">
+                        The Micro Instruction Controller, the MIC, also known as RMIC, for Rask MIC (Speedy MIC).
+                    </MudText>
+                </li>
+
+                <br />
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        The Arithmetical and Logical Unit gate array (ALU, also known as the BUFALU).
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="ml-6 mt-2">
+                        The ALU is modelled after the Am2901 bit-slice processor, and in the original ND-100 there was 4 (4 bits each), but the emulator simulates a 16 bit ALU.
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="ml-6 mt-2">
+                        There are also some added registers like the data bus register, the general purpose register, and the internal register block.
+                    </MudText>
+                </li>
+
+                <br />
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        The Micro Address Controller (The MAC, also called RMAC, for Rask MAC (Speedy MAC).
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="ml-6 mt-2">
+                        Hardware address arithmetic, which in the ND-100 had been done in microcode.
+                    </MudText>
+                </li>
+                <br />
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        The Interrupt Controller
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="ml-6 mt-2">
+                        Based on an emulation of two Am2914 Priority Interrupt Controller's cascaded together to have a total of 16 interrupt levels.
+                    </MudText>
+                </li>
+                <br />
+
+
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        Memory
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="ml-6 mt-2">
+                        2 MegaWords of memory is available
+                    </MudText>
+                </li>
+            </ul>
+        </MudCardContent>
+    </MudCard>
+
+
+    <br />
+
+
+    <MudCard Elevation="25" Class="rounded mt-8" Style="background-color: rgba(255, 255, 255, 0.85);">
+        <MudCardContent>
+            <MudText Typo="Typo.h6" Class="mt-4">Functionality on the microcode level</MudText>
+            <ul class="list-disc pl-6 mt-4">
+                <li>
+                    <MudText Typo="Typo.body1">
+                        This emulator has functionality to debug and step through over 17000 lines of original ND-110 microcode
+                    </MudText>
+                </li>
+                <li>
+                    <MudText Typo="Typo.body1">
+                        There is functionality to inspect and change ALU registers, ALU RAM, The registerFile (16 register on 16 levels) and Memory
+                    </MudText>
+                </li>
+
+                <br />
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        You can also inspecting the Interrupt subsystem and triggering interrupts
+                    </MudText>
+                </li>
+            </ul>
+        </MudCardContent>
+    </MudCard>
+
+    <br />
+
+    <MudCard Elevation="25" Class="rounded mt-8" Style="background-color: rgba(255, 255, 255, 0.85);">
+        <MudCardContent>
+            <MudText Typo="Typo.h6" Class="mt-4">Functionality on the ND Machine level</MudText>
+            <ul class="list-disc pl-6 mt-4">
+                <li>
+                    <MudText Typo="Typo.body1">
+                        The emulator also offers functionality at the ND Machine level, including an assembler to edit and assemble your program using ND opcodes,
+                        as well as a macro-level debugger to step through your compiled program.
+                        All this is executed inside the microcode-based CPU, so you can be confident that you're getting a true-to-life simulation of the ND-110.
+                    </MudText>
+                </li>
+
+                <br />
+
+                <li>
+                    <MudText Typo="Typo.body1">
+                        When stepping through your program, you can also inspect all registers on the microcode level
+                    </MudText>
+                </li>
+            </ul>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+
+<br />
+
+<MudAlert Severity="Severity.Warning">Application is still under development, so expect to se bugs and unfinished functionality</MudAlert>
+<br />
+<MudAlert Severity="Severity.Normal">You can find more documentation about the Norsk Data machines here: <MudLink Href="https://ndwiki.org" Typo="Typo.body2" Color="Color.Inherit"><b>https://ndwiki.org</b></MudLink></MudAlert>
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeAsync<object>("console.log", $"Compile time {CompilationDate.Date.ToString()}");
+
+        }
+    }
+}

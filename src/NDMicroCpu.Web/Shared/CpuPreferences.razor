@@ -1,0 +1,70 @@
+@inject IJSRuntime JS
+@inject NDMicroCpu.Web.Services.IAppService appService
+
+@* CPU-type preference. Picks which machine the whole emulator runs (ND-110 RASK vs ND-120
+   DELILAH-L), which in turn decides the microcode ROM + listing loaded (debugger source view).
+   The choice is remembered in browser localStorage and re-applied on the next visit. *@
+<MudNavGroup Title="Preferences" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+    <div class="px-4 py-2">
+        <MudSelect T="string" Label="CPU" Value="@_cpu" ValueChanged="OnCpuChanged"
+                   Dense="true" Disabled="@_busy" Variant="Variant.Outlined">
+            <MudSelectItem Value="@("ND110")">ND-110 (RASK)</MudSelectItem>
+            <MudSelectItem Value="@("ND120")">ND-120 (DELILAH-L)</MudSelectItem>
+        </MudSelect>
+        @if (_busy)
+        {
+            <MudText Typo="Typo.caption" Class="mt-1">Switching microcode…</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.caption" Class="mt-1">ROM + listing follow this choice.</MudText>
+        }
+    </div>
+</MudNavGroup>
+
+@code {
+    // localStorage key for the remembered CPU choice.
+    const string StorageKey = "nd-cpu-type";
+
+    string _cpu = "ND110";
+    bool _busy = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Make sure the default CPU is loaded first (idempotent), then honour any saved choice.
+        await appService.InitializeAsync();
+
+        string saved = await JS.InvokeAsync<string>("localStorage.getItem", StorageKey);
+        if (saved == "ND110" || saved == "ND120")
+        {
+            _cpu = saved;
+            var target = saved == "ND120" ? NDMicroCpu.Core.Enums.CPUType.ND120 : NDMicroCpu.Core.Enums.CPUType.ND110;
+            if (target != appService.SelectedCpuType)
+            {
+                _busy = true; StateHasChanged();
+                await appService.LoadCpuAsync(target);
+                _busy = false;
+            }
+        }
+        else
+        {
+            _cpu = appService.SelectedCpuType == NDMicroCpu.Core.Enums.CPUType.ND120 ? "ND120" : "ND110";
+        }
+        StateHasChanged();
+    }
+
+    async Task OnCpuChanged(string value)
+    {
+        if (value != "ND110" && value != "ND120") return;
+        _cpu = value;
+        _busy = true; StateHasChanged();
+
+        var target = value == "ND120" ? NDMicroCpu.Core.Enums.CPUType.ND120 : NDMicroCpu.Core.Enums.CPUType.ND110;
+        await appService.LoadCpuAsync(target);
+        await JS.InvokeVoidAsync("localStorage.setItem", StorageKey, value);
+
+        _busy = false; StateHasChanged();
+    }
+}

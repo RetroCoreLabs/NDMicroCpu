@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [ "NDMicroCpu.Core/NDMicroCpu.Core.csproj", "NDMicroCpu.Cli/NDMicroCpu.Cli.csproj", "NDMicroCpu.Debugger.Contracts/NDMicroCpu.Debugger.Contracts.csproj" ],
+          "exclude": [ "**/*.Tests/**", "**/tests/**", "**/tools/**", "**/obj/**", "**/bin/**" ],
+          "src": ".."
+        }
+      ],
+      "dest": "api",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "outputFormat": "mref"
+    }
+  ],
+  "build": {
+    "content": [
+      { "files": [ "api/**.yml", "api/index.md" ] },
+      { "files": [ "*.md", "toc.yml" ] },
+      { "files": [ "docs/**.md", "docs/**/toc.yml" ] }
+    ],
+    "resource": [ { "files": [ "images/**" ] } ],
+    "output": "_site",
+    "globalMetadata": {
+      "_appName": "NDMicroCpu",
+      "_appTitle": "NDMicroCpu",
+      "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs",
+      "_enableSearch": true,
+      "_disableContribution": false,
+      "_gitContribute": {
+        "repo": "https://github.com/RetroCoreLabs/NDMicroCpu",
+        "branch": "main"
+      }
+    },
+    "template": [ "default", "modern" ],
+    "postProcessors": [ "ExtractSearchIndex" ],
+    "keepFileLink": false,
+    "disableGitFeatures": false
+  }
+}

@@ -1,0 +1,63 @@
+INSTRUCTION-B RUN - full level-1 sweep transcript
+Verdict: COMPLETE - all groups passed on every level, tests now looping
+
+#0!
+---------------------------
+--  INSTRUCTION  VERIFY  --
+---------------------------
+
+PROGRAM NUMBER: 204384B
+PROGRAM NAME  : INSTRUCTION-B
+DATE ISSUED   : 83.11.01
+
+
+COMPUTER: ND-100/CX  32 BIT FLOATING FORMAT WITH NORMAL CYCLE.
+ALD     : 0
+PAGING  : MEMORY MANAGEMENT I
+CACHE   :  NO
+
+The command HELP gives you a list of the commands.
+
+>RUN
+RUN
+
+
+== RUNNING TESTS ON LEVEL 1 ==
+
+== CLOCK STARTED             ==
+
+
+== DUMMY OUTPUT STARTED      ==
+
+
+== IOX-ERROR STARTED         ==
+
+
+== LEVEL 13 (OCT.) STARTED   ==
+
+== ARGUMENT INSTRUCTIONS                  == END OF TEST ==
+== MEMORY REFERENCE INSTR.                == END OF TEST ==
+== SEQUENCING INSTRUCTIONS                == END OF TEST ==
+== REGISTER OPERATIONS                    == END OF TEST ==
+== BIT INSTR.                             == END OF TEST ==
+== SHIFT INSTR.                           == END OF TEST ==
+== PRIVILEGED INSTRUCTIONS                == END OF TEST ==
+== BFILL, MOVB AND MOVBF                  == END OF TEST ==
+
+== RUNNING TESTS ON LEVEL 2 ==
+
+== RUNNING TESTS ON LEVEL 3 ==
+
+== RUNNING TESTS ON LEVEL 4 ==
+
+== RUNNING TESTS ON LEVEL 5 ==
+
+== RUNNING TESTS ON LEVEL 6 ==
+
+== RUNNING TESTS ON LEVEL 7 ==
+
+== RUNNING TESTS ON LEVEL 8 ==
+
+== RUNNING TESTS ON LEVEL 9 ==
+
+== THE TESTS ARE NOW LOOPING ==

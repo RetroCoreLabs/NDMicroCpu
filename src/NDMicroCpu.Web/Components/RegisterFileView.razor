@@ -1,0 +1,115 @@
+﻿<MudCarousel Class="mud-width-full" Style="height:500px;" AutoCycle="false" ShowArrows="true" EnableSwipeGesture="true"  TData="object">
+    <BulletTemplate Context="selected">
+        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+            <span class="mud-icon-button-label">
+                <MudIcon Icon="@(selected ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@Color.Inherit" />
+            </span>
+        </div>
+    </BulletTemplate>
+    <PreviousButtonTemplate>
+        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+            <span class="mud-icon-button-label">
+                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
+            </span>
+        </div>
+    </PreviousButtonTemplate>
+    <NextButtonTemplate>
+        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+            <span class="mud-icon-button-label">
+                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
+            </span>
+        </div>
+    </NextButtonTemplate>
+    <ChildContent>
+        <MudCarouselItem Color="@Color.Primary">
+            Level 0
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="0"></RegistersView>
+        </MudCarouselItem>
+        <MudCarouselItem Color="@Color.Secondary">
+            Level 1
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="1"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 2
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="2"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 3
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="3"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 4
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="4"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 5
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="5"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 6
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="6"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 7
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="7"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 8
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="8"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 9
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="9"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 10
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="10"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 11
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="11"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 12
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="12"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 13
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="13"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 14
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="14"></RegistersView>
+
+        </MudCarouselItem>
+        <MudCarouselItem>
+            Level 15
+            <RegistersView RegisterFile="RegisterFile" RegisterLevel="15"></RegistersView>
+
+        </MudCarouselItem>
+    </ChildContent>
+</MudCarousel>
+
+@code {
+    [Parameter]
+    public RegisterFile? RegisterFile { get; set; }
+
+    public void ResetUI() {
+
+        StateHasChanged();
+    }
+
+}
