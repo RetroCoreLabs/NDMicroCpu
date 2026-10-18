@@ -26,11 +26,21 @@
       { "files": [ "*.md", "toc.yml" ] },
       { "files": [ "docs/**.md", "docs/toc.yml" ], "exclude": [ "docs/manuals/**" ], "src": ".." }
     ],
-    "resource": [ { "files": [ "images/**" ] } ],
+    "resource": [
+      { "files": [ "images/**" ] },
+      {
+        "_comment": "The repository's own icon for the page header and the browser tab; without these the template ships its own letter D.",
+        "files": [ "assets/NDMicroCpu.svg", "assets/NDMicroCpu.ico" ],
+        "src": "..",
+        "dest": ""
+      }
+    ],
     "output": "_site",
     "globalMetadata": {
       "_appName": "NDMicroCpu",
       "_appTitle": "NDMicroCpu",
+      "_appLogoPath": "assets/NDMicroCpu.svg",
+      "_appFaviconPath": "assets/NDMicroCpu.ico",
       "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs - <a href=\"https://github.com/RetroCoreLabs/NDMicroCpu\">Source on GitHub</a>",
       "_enableSearch": true,
       "_disableContribution": false,
@@ -39,7 +49,7 @@
         "branch": "main"
       }
     },
-    "template": [ "default", "modern" ],
+    "template": [ "default", "modern", "template" ],
     "postProcessors": [ "ExtractSearchIndex" ],
     "keepFileLink": false,
     "disableGitFeatures": false

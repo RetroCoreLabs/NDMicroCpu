@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/assets/NDMicroCpu-512.png" width="160" alt="NDMicroCpu logo: a green micro sign on a dark chip with a green ring.">
+</p>
+
 # NDMicroCpu
 
 [![build](https://github.com/RetroCoreLabs/NDMicroCpu/actions/workflows/build.yml/badge.svg)](https://github.com/RetroCoreLabs/NDMicroCpu/actions/workflows/build.yml)

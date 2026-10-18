@@ -1,0 +1,31 @@
+/*
+ * Site styles added on top of DocFX's modern template (docfx.json "template" lists this folder last).
+ *
+ * The header logo. The template gives #logo no size: it relies on the image's own one, and
+ * DocFX's built-in logo.svg says width="38pt". Our icon is an SVG with only a viewBox, which a
+ * browser draws far too large, so the logo would spill out of the 59 px header and push the site
+ * name over the menu (seen on RetroTerm and NDMicroAsm, 18 October 2026). Sizing it here works
+ * for any icon file, SVG or PNG, whatever size it carries itself.
+ */
+.navbar .navbar-brand #logo {
+  height: 40px;
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+/* Keep the site name from being squeezed into the menu on a narrow window. */
+.navbar .navbar-brand {
+  flex-shrink: 0;
+}
+
+/* A menu entry stays on one line; between 768 and 992 px the template let "API Reference" and
+   "GitHub" break in the middle (measured with tools/check-site.js from repo-standards). */
+.navbar .navbar-nav .nav-link {
+  white-space: nowrap;
+}
+
+/* The template puts a <wbr> at every camel-case boundary in a menu name so long API names can
+   break; nowrap does not stop a <wbr>, so "GitHub" became "Git" over "Hub" at 800 px. */
+.navbar .navbar-nav .nav-link wbr {
+  display: none;
+}
