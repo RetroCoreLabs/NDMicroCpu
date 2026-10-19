@@ -17,3 +17,6 @@ src/tests/NDMicroCpu.Core.Tests/Perf/*-result.txt
 
 # Scaffold written by repo-standards\tools\apply-standards.ps1. Copy from it, then delete it.
 README.template.md
+
+# Working notes for coding agents stay on disk, never in the repository
+CLAUDE.md
